@@ -1,6 +1,6 @@
 import { fromString, toString } from "uint8arrays";
 import { BaseName, encode } from "multibase";
-import * as varint from "multiformats/varint";
+import { varint } from "multiformats";
 import { IKey } from "@veramo/core-types";
 
 export enum SupportedVerificationMethods {
@@ -76,8 +76,21 @@ export abstract class CryptoKey {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async sign(algorithm: string, data: Uint8Array): Promise<string> {
-    throw new Error("sign not implemented for key of type " + this.keyType);
+  abstract signBytes(algorithm:string, data:Uint8Array): Promise<Uint8Array>;
+  sign(algorithm: string, data: Uint8Array, encode:string = 'raw'): Promise<string> {
+    return this.signBytes(algorithm, data)
+      .then((signature:Uint8Array) => {
+        switch (encode) {
+          default:
+          case 'raw': break;
+          case 'base16':
+          case 'hex': return toString(signature, 'base16');
+          case 'base58btc': return toString(signature, 'base58btc');
+          case 'base64': return toString(signature, 'base64');
+          case 'base64url': return toString(signature, 'base64url');
+        }
+        return signature;
+      });
   }
 
   initialisePrivateKey(key: any) {
@@ -96,31 +109,35 @@ export abstract class CryptoKey {
     return fromString(input, "base16");
   }
 
+  hasPublicKey(): boolean {
+    return this.publicKeyBytes !== null && this.publicKeyBytes.length > 0;
+  }
   publicKey(): Uint8Array {
     return this.publicKeyBytes ?? new Uint8Array();
   }
-
-  publicKeyHex(): string {
-    return this.bytesToHex(this.publicKeyBytes!);
+  exportPublicKey(): string {
+    return this.bytesToHex(this.publicKey());
   }
   setPublicKey(publicKeyHex: string) {
     this.publicKeyBytes = this.hexToBytes(publicKeyHex);
   }
 
-  makeDidKeyIdentifier(): string {
-    return this.bytesToMultibase(this.publicKey());
-  }
-
-  hasPublicKey(): boolean {
-    return this.publicKeyBytes !== null && this.publicKeyBytes.length > 0;
-  }
   hasPrivateKey(): boolean {
     return this.privateKeyBytes !== null && this.privateKeyBytes.length > 0;
   }
+  privateKey(): Uint8Array {
+    return this.privateKeyBytes ?? new Uint8Array();
+  }
   exportPrivateKey(): string {
-    return this.bytesToHex(this.privateKeyBytes!);
+    return this.bytesToHex(this.privateKey());
+  }
+  setPrivateKey(privateKeyHex: string) {
+    this.privateKeyBytes = this.hexToBytes(privateKeyHex);
   }
 
+  toDIDKey(): string {
+    return this.bytesToMultibase(this.publicKey());
+  }
   protected bytesToMultibase(b: Uint8Array, codecCode?: number) {
     if (!codecCode) {
       codecCode = this.codecCode;

@@ -11,6 +11,7 @@ import {
   DIDResolutionResult,
   VerificationMethod,
 } from "did-resolver";
+import { fromString, toString } from 'uint8arrays'
 
 export class Ed25519 extends CryptoKey {
   constructor() {
@@ -55,7 +56,7 @@ export class Ed25519 extends CryptoKey {
     const publicKeyFormat: SupportedVerificationMethods =
       method || SupportedVerificationMethods.JsonWebKey2020;
 
-    const keyMultibase = this.makeDidKeyIdentifier();
+    const keyMultibase = this.toDIDKey();
     const did = "did:key:" + keyMultibase;
     const verificationMethod: VerificationMethod = {
       id: `${did}#${keyMultibase}`,
@@ -128,15 +129,15 @@ export class Ed25519 extends CryptoKey {
     return ["EdDSA", "Ed25519"];
   }
 
-  async sign(algorithm: string, data: Uint8Array) {
+  async signBytes(algorithm: string, data: Uint8Array) {
     if (!this.algorithms().includes(algorithm)) {
       throw new Error(
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
       );
     }
-    const signer = EdDSASigner(this.privateKeyBytes);
+    const signer = EdDSASigner(this.privateKey());
     const signature = await signer(data);
     // base64url encoded string
-    return signature as string;
+    return fromString(signature as string, 'base64url');
   }
 }
