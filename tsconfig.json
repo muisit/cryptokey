@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "noEmit": true              // Don't emit JS on dev
+    "noEmit": true // Don't emit JS on dev
   },
   "include": ["src"]
 }
