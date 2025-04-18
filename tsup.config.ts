@@ -6,5 +6,11 @@ export default defineConfig({
   dts: true,               // Emit type declarations
   clean: true,             // Clean output dir before build
   sourcemap: false,        // Optional
-  outDir: 'dist'
+  outDir: 'dist',
+  external: [
+    '@veramo/utils',
+    'did-jwt',
+    'did-resolver'
+  ],
+  minify: true
 });

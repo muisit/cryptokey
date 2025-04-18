@@ -1,6 +1,6 @@
 import { contextFromKeyFormat, CryptoKey, SupportedVerificationMethods } from "./CryptoKey";
 import { x25519 } from '@noble/curves/ed25519'
-import { multibaseToBytes, bytesToBase58, createJWK, convertEd25519PublicKeyToX25519} from '@veramo/utils';
+import { multibaseToBytes, bytesToBase58, createJWK } from '@veramo/utils';
 import { VerificationMethod } from "did-resolver";
 
 export class X25519 extends CryptoKey {
@@ -17,14 +17,14 @@ export class X25519 extends CryptoKey {
 
     initialisePrivateKey(key: any): void {
         this.privateKeyBytes = key;
-        this.publicKeyBytes = x25519.getPublicKey(this.privateKeyBytes);
+        this.publicKeyBytes = x25519.getPublicKey(this.privateKeyBytes!);
     }
 
     toJWK() {
       return {
           kty: 'OKP',
           crv: 'X25519',
-          x: Buffer.from(this.publicKeyBytes).toString('base64url'),
+          x: Buffer.from(this.publicKeyBytes!).toString('base64url'),
       };
   }
 
@@ -46,7 +46,7 @@ export class X25519 extends CryptoKey {
       
         const keyMultibase = this.makeDidKeyIdentifier();
         const did = 'did:key:' + keyMultibase;
-        let verificationMethod: VerificationMethod = {
+        const verificationMethod: VerificationMethod = {
           id: `${did}#${keyMultibase}`,
           type: publicKeyFormat.toString(),
           controller: did,

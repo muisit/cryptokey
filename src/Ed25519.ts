@@ -1,7 +1,7 @@
 import { contextFromKeyFormat, CryptoKey, SupportedVerificationMethods } from "./CryptoKey";
 import { ed25519 } from '@noble/curves/ed25519'
 import { EdDSASigner } from 'did-jwt'
-import { multibaseToBytes, bytesToBase58, createJWK, convertEd25519PublicKeyToX25519} from '@veramo/utils';
+import { multibaseToBytes, bytesToBase58, createJWK } from '@veramo/utils';
 import { DIDDocument, DIDResolutionResult, VerificationMethod } from "did-resolver";
 
 export class Ed25519 extends CryptoKey {
@@ -15,8 +15,8 @@ export class Ed25519 extends CryptoKey {
         this.initialisePrivateKey(ed25519.utils.randomPrivateKey());
     }
 
-    initialisePrivateKey(key: any): void {
-        this.privateKeyBytes = ed25519.utils.randomPrivateKey();
+    initialisePrivateKey(key?: Uint8Array): void {
+        this.privateKeyBytes = key ?? ed25519.utils.randomPrivateKey();
         this.publicKeyBytes = ed25519.getPublicKey(this.privateKeyBytes);
     }
 
@@ -24,7 +24,7 @@ export class Ed25519 extends CryptoKey {
         return {
             kty: 'OKP',
             crv: 'Ed25519',
-            x: Buffer.from(this.publicKeyBytes).toString('base64url'),
+            x: Buffer.from(this.publicKeyBytes!).toString('base64url'),
         };
     }
 
@@ -46,13 +46,13 @@ export class Ed25519 extends CryptoKey {
            
         const keyMultibase = this.makeDidKeyIdentifier();
         const did = 'did:key:' + keyMultibase;
-        let verificationMethod: VerificationMethod = {
+        const verificationMethod: VerificationMethod = {
           id: `${did}#${keyMultibase}`,
           type: publicKeyFormat.toString(),
           controller: did,
         }
 
-        let keyAgreementKeyFormat:SupportedVerificationMethods = publicKeyFormat;
+        //let keyAgreementKeyFormat:SupportedVerificationMethods = publicKeyFormat;
         switch (publicKeyFormat) {
             case SupportedVerificationMethods.JsonWebKey2020:
                 verificationMethod.publicKeyJwk = createJWK(this.keyType as any, this.publicKey(), 'sig');
@@ -61,11 +61,11 @@ export class Ed25519 extends CryptoKey {
                 verificationMethod.publicKeyMultibase = keyMultibase
                 break
             case SupportedVerificationMethods.Ed25519VerificationKey2020:
-                keyAgreementKeyFormat = SupportedVerificationMethods.X25519KeyAgreementKey2020;
+                //keyAgreementKeyFormat = SupportedVerificationMethods.X25519KeyAgreementKey2020;
                 verificationMethod.publicKeyMultibase = keyMultibase
                 break
             case SupportedVerificationMethods.Ed25519VerificationKey2018:
-                keyAgreementKeyFormat = SupportedVerificationMethods.X25519KeyAgreementKey2019;
+                //keyAgreementKeyFormat = SupportedVerificationMethods.X25519KeyAgreementKey2019;
                 verificationMethod.publicKeyBase58 = bytesToBase58(this.publicKey())
                 break
             default:
@@ -85,32 +85,6 @@ export class Ed25519 extends CryptoKey {
             capabilityDelegation: [verificationMethod.id],
             capabilityInvocation: [verificationMethod.id],
           },
-        }
-      
-        if (false) {
-        const encryptionKeyBytes = convertEd25519PublicKeyToX25519(this.publicKey());
-        const encryptionKeyMultibase = this.bytesToMultibase(encryptionKeyBytes, 0xec);
-        const encryptionKey: VerificationMethod = {
-            id: `${did}#${encryptionKeyMultibase}`,
-            type: keyAgreementKeyFormat.toString(),
-            controller: did,
-        }
-
-        if (keyAgreementKeyFormat === SupportedVerificationMethods.JsonWebKey2020) {
-            encryptionKey.publicKeyJwk = createJWK('X25519', encryptionKeyBytes, 'enc')
-        }
-        else if (keyAgreementKeyFormat === SupportedVerificationMethods.X25519KeyAgreementKey2019) {
-            ldContextArray.push(contextFromKeyFormat[keyAgreementKeyFormat])
-            encryptionKey.publicKeyBase58 = bytesToBase58(encryptionKeyBytes)
-        }
-        else {
-            if (keyAgreementKeyFormat === SupportedVerificationMethods.X25519KeyAgreementKey2020) {
-              ldContextArray.push(contextFromKeyFormat[keyAgreementKeyFormat])
-            }
-            encryptionKey.publicKeyMultibase = encryptionKeyMultibase
-        }
-        result.didDocument?.verificationMethod?.push(encryptionKey)
-        result.didDocument!.keyAgreement = [encryptionKey.id]
         }
 
         let ldContext = {}

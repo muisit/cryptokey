@@ -2,37 +2,55 @@
   "name": "@muisit/cryptokey",
   "version": "1.0.0",
   "description": "Cryptography for assymmetric keys in Node",
-  "main": "dist/index.cjs.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "repository": "https://github.com/muisit/cryptokey",
   "author": "muisIT",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "private": false,
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.30.1",
-    "@typescript-eslint/parser": "^8.30.1",
+    "@eslint/js": "^9.24.0",
+    "@types/multibase": "^3.1.0",
     "@veramo/core-types": "6.0.0",
     "eslint": "^9.24.0",
     "eslint-config-prettier": "^10.1.2",
     "prettier": "^3.5.3",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.30.1",
     "vitest": "2.1.5"
   },
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
   },
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     }
   },
   "dependencies": {
     "@veramo/utils": "6.0.0",
     "did-jwt": "^8.0.11",
-    "did-resolver": "^4.1.0"
-  }
+    "did-resolver": "^4.1.0",
+    "multiformats": "^13.3.2"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/index.d.ts"
+      ]
+    }
+  },
+  "sideEffects": false
 }

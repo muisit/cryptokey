@@ -28,8 +28,8 @@ export class Secp256r1 extends CryptoKey {
         return {
             kty: 'EC',
             crv: 'P-256',
-            x: Buffer.from(this.publicKeyBytes.slice(1, 33)).toString('base64url'),
-            y: Buffer.from(this.publicKeyBytes.slice(33)).toString('base64url')
+            x: Buffer.from(this.publicKeyBytes!.slice(1, 33)).toString('base64url'),
+            y: Buffer.from(this.publicKeyBytes!.slice(33)).toString('base64url')
         };
     }
 
@@ -51,7 +51,7 @@ export class Secp256r1 extends CryptoKey {
  
         const keyMultibase = this.makeDidKeyIdentifier();
         const did = 'did:key:' + keyMultibase;
-        let verificationMethod: VerificationMethod = {
+        const verificationMethod: VerificationMethod = {
           id: `${did}#${keyMultibase}`,
           type: publicKeyFormat.toString(),
           controller: did,

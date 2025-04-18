@@ -69,7 +69,7 @@ export const Factory = {
                 key = new Secp256k1();
                 break;
             default:
-                throw new Error("key type " + key.type + " notsupported");
+                throw new Error("key type " + mkey.type + " not supported");
         }
 
         key.importFromManagedKey(mkey);

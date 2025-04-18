@@ -1,7 +1,7 @@
 import { fromString, toString } from 'uint8arrays'
 import { BaseName, encode } from 'multibase'
-import { varint } from 'multiformats'
-import { ManagedKeyInfo } from '@veramo/core-types';
+import * as varint from 'multiformats/varint'
+import { IKey } from '@veramo/core-types';
 
 export enum SupportedVerificationMethods {
     'JsonWebKey2020',
@@ -33,27 +33,35 @@ export const contextFromKeyFormat: Record<string, string | object> = {
     },
 }
 
+export interface JWK {
+    kty: string;
+    [x:string]: any;
+}
+
 export abstract class CryptoKey {
     public keyType:string;
-    public privateKeyBytes:any;
-    public publicKeyBytes:any;
+    public privateKeyBytes:Uint8Array|null;
+    public publicKeyBytes:Uint8Array|null;
     public codecCode:number = 0;
     public encodingBase:BaseName = 'base58btc';
 
     constructor() {
         this.keyType = 'none';
         this.privateKeyBytes = null;
+        this.publicKeyBytes = null;
     }
 
     abstract createPrivateKey():void;
     abstract algorithms():string[];
-    abstract toJWK():any;
+    abstract toJWK():JWK;
     abstract importFromDid(didKey:string):void;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     didDocument(method?:SupportedVerificationMethods):any {
         return {};
     }
 
-    importFromManagedKey(mkey:ManagedKeyInfo) {
+    importFromManagedKey(mkey:IKey) {
         if (mkey.publicKeyHex) {
             this.publicKeyBytes = this.hexToBytes(mkey.publicKeyHex);
         }
@@ -62,6 +70,7 @@ export abstract class CryptoKey {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async sign(algorithm:string, data:Uint8Array):Promise<string> {
         throw new Error("sign not implemented for key of type " + this.keyType);
     }
@@ -85,11 +94,11 @@ export abstract class CryptoKey {
     }
 
     publicKey():Uint8Array {
-        return this.publicKeyBytes;
+        return this.publicKeyBytes ?? new Uint8Array();
     }
 
     publicKeyHex():string {
-        return this.bytesToHex(this.publicKeyBytes);
+        return this.bytesToHex(this.publicKeyBytes!);
     }
     setPublicKey(publicKeyHex:string) {
         this.publicKeyBytes = this.hexToBytes(publicKeyHex);
@@ -99,9 +108,9 @@ export abstract class CryptoKey {
         return this.bytesToMultibase(this.publicKey());
     };
 
-    hasPublicKey():boolean { return this.publicKeyBytes && this.publicKeyBytes.length; }
-    hasPrivateKey():boolean { return this.privateKeyBytes && this.privateKeyBytes.length; }
-    exportPrivateKey():string { return this.bytesToHex(this.privateKeyBytes); }
+    hasPublicKey():boolean { return this.publicKeyBytes !== null && this.publicKeyBytes.length > 0; }
+    hasPrivateKey():boolean { return this.privateKeyBytes !== null && this.privateKeyBytes.length > 0; }
+    exportPrivateKey():string { return this.bytesToHex(this.privateKeyBytes!); }
    
     protected bytesToMultibase(b: Uint8Array, codecCode?:number) {
         if (!codecCode) {
