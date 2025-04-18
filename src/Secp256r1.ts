@@ -7,6 +7,7 @@ import { ES256Signer } from "did-jwt";
 import { multibaseToBytes, createJWK } from "@veramo/utils";
 import { VerificationMethod } from "did-resolver";
 import { createECDH } from "node:crypto";
+import { fromString } from 'uint8arrays'
 
 export class Secp256r1 extends CryptoKey {
   constructor() {
@@ -125,15 +126,15 @@ export class Secp256r1 extends CryptoKey {
     return ["ES256"];
   }
 
-  async sign(algorithm: string, data: Uint8Array) {
+  async signBytes(algorithm: string, data: Uint8Array) {
     if (!this.algorithms().includes(algorithm)) {
       throw new Error(
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
       );
     }
-    const signer = ES256Signer(this.privateKeyBytes);
+    const signer = ES256Signer(this.privateKey());
     const signature = await signer(data);
     // base64url encoded string
-    return signature as string;
+    return fromString(signature as string, 'base64url');
   }
 }

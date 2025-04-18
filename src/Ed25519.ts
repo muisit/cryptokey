@@ -11,7 +11,7 @@ import {
   DIDResolutionResult,
   VerificationMethod,
 } from "did-resolver";
-import { fromString, toString } from 'uint8arrays'
+import { fromString } from 'uint8arrays'
 
 export class Ed25519 extends CryptoKey {
   constructor() {
