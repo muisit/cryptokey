@@ -7,7 +7,7 @@ import { ES256Signer } from "did-jwt";
 import { multibaseToBytes, createJWK } from "@veramo/utils";
 import { VerificationMethod } from "did-resolver";
 import { createECDH } from "node:crypto";
-import { fromString } from 'uint8arrays'
+import { fromString } from 'uint8arrays';
 
 export class Secp256r1 extends CryptoKey {
   constructor() {
@@ -17,13 +17,13 @@ export class Secp256r1 extends CryptoKey {
   }
 
   createPrivateKey() {
-    const key = createECDH("secp256r1");
+    const key = createECDH("prime256v1");
     key.generateKeys();
     this.initialisePrivateKey(this.hexToBytes(key.getPrivateKey("hex")));
   }
 
   initialisePrivateKey(key: any): void {
-    const secpkey = createECDH("secp256r1");
+    const secpkey = createECDH("prime256v1");
     secpkey.setPrivateKey(key);
     this.privateKeyBytes = key;
     this.publicKeyBytes = this.hexToBytes(
@@ -62,7 +62,7 @@ export class Secp256r1 extends CryptoKey {
     const publicKeyFormat: SupportedVerificationMethods =
       method || SupportedVerificationMethods.JsonWebKey2020;
 
-    const keyMultibase = this.makeDidKeyIdentifier();
+    const keyMultibase = this.toDIDKey();
     const did = "did:key:" + keyMultibase;
     const verificationMethod: VerificationMethod = {
       id: `${did}#${keyMultibase}`,
