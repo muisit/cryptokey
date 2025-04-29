@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { TKeyType } from "@veramo/core-types";
 import { Secp256r1 } from "../src/Secp256r1";
-import * as crypto from 'node:crypto';
+import * as crypto from "node:crypto";
 
 test("Initialise key", () => {
   const key = new Secp256r1();
@@ -169,11 +169,12 @@ test("verify", async () => {
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
   const signature = await key.sign("ES256", message, "base64url");
-  expect(await key.verify("ES256", key.base64UrlToBytes(signature), message)).toBeTruthy();
+  expect(
+    await key.verify("ES256", key.base64UrlToBytes(signature), message),
+  ).toBeTruthy();
 });
 
-
-test('toJWK', async () => {
+test("toJWK", async () => {
   const key = new Secp256r1();
   key.initialisePrivateKey(
     key.hexToBytes(
@@ -182,10 +183,17 @@ test('toJWK', async () => {
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   const jwk = key.toJWK();
-  const ckey = await crypto.subtle.importKey('jwk', jwk as crypto.JsonWebKey, {
-    name: 'ECDSA',
-    namedCurve: 'P-256'}, false, jwk.key_ops as KeyUsage[]);
+  const ckey = await crypto.subtle.importKey(
+    "jwk",
+    jwk as crypto.JsonWebKey,
+    {
+      name: "ECDSA",
+      namedCurve: "P-256",
+    },
+    false,
+    jwk.key_ops as KeyUsage[],
+  );
   expect(ckey).toBeDefined();
-  expect(ckey.type).toBe('public');
+  expect(ckey.type).toBe("public");
   expect(ckey.usages).toStrictEqual(jwk.key_ops);
 });

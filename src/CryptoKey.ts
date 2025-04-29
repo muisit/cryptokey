@@ -2,7 +2,7 @@ import { fromString, toString } from "uint8arrays";
 import { BaseName, encode } from "multibase";
 import { varint } from "multiformats";
 import { IKey } from "@veramo/core-types";
-import * as crypto from 'node:crypto';
+import * as crypto from "node:crypto";
 
 export enum SupportedVerificationMethods {
   "JsonWebKey2020",
@@ -116,16 +116,16 @@ export abstract class CryptoKey {
     }
     return fromString(input, "base16");
   }
-  public bytesToBase64(bytes:Uint8Array):string {
+  public bytesToBase64(bytes: Uint8Array): string {
     return toString(bytes, "base64");
   }
-  public base64ToBytes(buffer:string) {
+  public base64ToBytes(buffer: string) {
     return fromString(buffer, "base64");
   }
-  public bytesToBase64Url(bytes:Uint8Array):string {
+  public bytesToBase64Url(bytes: Uint8Array): string {
     return toString(bytes, "base64url");
   }
-  public base64UrlToBytes(buffer:string) {
+  public base64UrlToBytes(buffer: string) {
     return fromString(buffer, "base64url");
   }
 

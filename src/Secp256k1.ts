@@ -7,7 +7,7 @@ import { multibaseToBytes } from "@veramo/utils";
 import { VerificationMethod } from "did-resolver";
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { sha256 } from "@noble/hashes/sha256";
-import * as crypto from 'node:crypto';
+import * as crypto from "node:crypto";
 import { JsonWebKey } from "did-jwt/lib/util";
 
 export class Secp256k1 extends CryptoKey {
@@ -38,15 +38,15 @@ export class Secp256k1 extends CryptoKey {
     return this.hexToBytes(uncompressedHex);
   }
 
-  toJWK():crypto.JsonWebKey {
+  toJWK(): crypto.JsonWebKey {
     const uncompressed = this.compressedToUncompressed(this.publicKey());
     return {
       kty: "EC",
       crv: "secp256k1",
       kid: this.bytesToHex(this.publicKey()),
-      use: 'sig',
-      key_ops: ['verify'],
-      alg: 'ES256',
+      use: "sig",
+      key_ops: ["verify"],
+      alg: "ES256",
       x: Buffer.from(uncompressed.slice(1, 33)).toString("base64url"),
       y: Buffer.from(uncompressed.slice(33)).toString("base64url"),
     };
@@ -172,11 +172,7 @@ export class Secp256k1 extends CryptoKey {
       signature = signature.slice(0, 64);
     }
 
-    isValid = secp256k1.verify(
-      signature,
-      messageHash,
-      this.publicKey(),
-    );
+    isValid = secp256k1.verify(signature, messageHash, this.publicKey());
 
     if (isValid) {
       return true;

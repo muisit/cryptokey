@@ -11,7 +11,7 @@ import {
 } from "did-resolver";
 import { ed25519 } from "@noble/curves/ed25519";
 import { JsonWebKey } from "did-jwt/lib/util";
-import * as crypto from 'node:crypto';
+import * as crypto from "node:crypto";
 
 export class Ed25519 extends CryptoKey {
   constructor() {
@@ -29,14 +29,14 @@ export class Ed25519 extends CryptoKey {
     this.publicKeyBytes = ed25519.getPublicKey(this.privateKeyBytes!);
   }
 
-  toJWK():crypto.JsonWebKey {
+  toJWK(): crypto.JsonWebKey {
     return {
       kty: "OKP",
       crv: "Ed25519",
       kid: this.bytesToHex(this.publicKey()),
-      use: 'sig',
-      key_ops: ['verify'],
-      alg: 'EdDSA',
+      use: "sig",
+      key_ops: ["verify"],
+      alg: "EdDSA",
       x: Buffer.from(this.publicKeyBytes!).toString("base64url"),
     };
   }
@@ -145,9 +145,10 @@ export class Ed25519 extends CryptoKey {
       );
     }
 
-    const isValid = ed25519.verify(signature,
+    const isValid = ed25519.verify(
+      signature,
       Buffer.from(data),
-      this.publicKey()
+      this.publicKey(),
     );
     if (isValid) {
       return true;

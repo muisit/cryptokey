@@ -42,15 +42,15 @@ export class Secp256r1 extends CryptoKey {
     return this.hexToBytes(uncompressedHex);
   }
 
-  toJWK():crypto.JsonWebKey {
+  toJWK(): crypto.JsonWebKey {
     const uncompressed = this.compressedToUncompressed(this.publicKey());
     return {
       kty: "EC",
       crv: "P-256",
       kid: this.bytesToHex(this.publicKey()),
-      use: 'sig',
-      key_ops: ['verify'],
-      alg: 'ES256',
+      use: "sig",
+      key_ops: ["verify"],
+      alg: "ES256",
       x: Buffer.from(uncompressed.slice(1, 33)).toString("base64url"),
       y: Buffer.from(uncompressed.slice(33)).toString("base64url"),
     };
@@ -159,11 +159,7 @@ export class Secp256r1 extends CryptoKey {
     }
 
     const messageHash = sha256(data);
-    const isValid = p256.verify(
-      signature,
-      messageHash,
-      this.publicKey(),
-    );
+    const isValid = p256.verify(signature, messageHash, this.publicKey());
     if (isValid) {
       return true;
     }
