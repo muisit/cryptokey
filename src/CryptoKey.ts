@@ -75,24 +75,36 @@ export abstract class CryptoKey {
     }
   }
 
-  abstract signBytes(algorithm:string, data:Uint8Array): Promise<Uint8Array>;
-  sign(algorithm: string, data: Uint8Array, encode:string = 'raw'): Promise<string> {
-    return this.signBytes(algorithm, data)
-      .then((signature:Uint8Array) => {
-        switch (encode) {
-          default:
-          case 'raw': break;
-          case 'base16':
-          case 'hex': return toString(signature, 'base16');
-          case 'base58btc': return toString(signature, 'base58btc');
-          case 'base64': return toString(signature, 'base64');
-          case 'base64url': return toString(signature, 'base64url');
-        }
-        return signature;
-      });
+  abstract signBytes(algorithm: string, data: Uint8Array): Promise<Uint8Array>;
+  sign(
+    algorithm: string,
+    data: Uint8Array,
+    encode: string = "raw",
+  ): Promise<string> {
+    return this.signBytes(algorithm, data).then((signature: Uint8Array) => {
+      switch (encode) {
+        default:
+        case "raw":
+          break;
+        case "base16":
+        case "hex":
+          return toString(signature, "base16");
+        case "base58btc":
+          return toString(signature, "base58btc");
+        case "base64":
+          return toString(signature, "base64");
+        case "base64url":
+          return toString(signature, "base64url");
+      }
+      return signature;
+    });
   }
 
-  abstract verify(algorithm:string, signature:string, data:Uint8Array): Promise<boolean>;
+  abstract verify(
+    algorithm: string,
+    signature: string,
+    data: Uint8Array,
+  ): Promise<boolean>;
 
   initialisePrivateKey(key: any) {
     this.privateKeyBytes = key;

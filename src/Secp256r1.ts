@@ -6,8 +6,8 @@ import {
 import { multibaseToBytes, createJWK } from "@veramo/utils";
 import { VerificationMethod } from "did-resolver";
 import { createECDH } from "node:crypto";
-import { p256 } from '@noble/curves/p256';
-import { sha256 } from '@noble/hashes/sha256';
+import { p256 } from "@noble/curves/p256";
+import { sha256 } from "@noble/hashes/sha256";
 
 /* NIST secp256r1 aka p256 aka prime256v1
  * https://www.secg.org/sec2-v2.pdf
@@ -35,7 +35,7 @@ export class Secp256r1 extends CryptoKey {
     );
   }
 
-  compressedToUncompressed(key:Uint8Array) {
+  compressedToUncompressed(key: Uint8Array) {
     const point = p256.ProjectivePoint.fromHex(this.bytesToHex(key));
     const uncompressedHex = point.toHex(false);
     return this.hexToBytes(uncompressedHex);
@@ -149,7 +149,7 @@ export class Secp256r1 extends CryptoKey {
     return new Uint8Array([...rBytes, ...sBytes]);
   }
 
-  async verify(algorithm:string, signature:string, data:Uint8Array) {
+  async verify(algorithm: string, signature: string, data: Uint8Array) {
     if (!this.algorithms().includes(algorithm)) {
       throw new Error(
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
@@ -157,7 +157,11 @@ export class Secp256r1 extends CryptoKey {
     }
 
     const messageHash = sha256(data);
-    const isValid = p256.verify(this.hexToBytes(signature), messageHash, this.publicKey());
+    const isValid = p256.verify(
+      this.hexToBytes(signature),
+      messageHash,
+      this.publicKey(),
+    );
     if (isValid) {
       return true;
     }

@@ -37,4 +37,4 @@ This library implements some methods for the following key types:
 - `didDocument()`: returns the DID document value
 - `importFromManagedKey(IKey)`: imports the key from a `@veramo/core` `IKey` structure
 - `sign(string, Uint8Array, string)`: signs the byte array according to the algorithm (first parameter) and encodes the result according to the last parameter. Uses `raw` encoding by default, but `base64url` is an often used encoding
-
+- `verify(string, string, Uint8Array)`: verifies the byte array agains the signature (second parameter) using the algorithm (first parameter)
