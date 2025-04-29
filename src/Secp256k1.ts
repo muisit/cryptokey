@@ -3,11 +3,12 @@ import {
   CryptoKey,
   SupportedVerificationMethods,
 } from "./CryptoKey";
-import { multibaseToBytes, createJWK } from "@veramo/utils";
+import { multibaseToBytes } from "@veramo/utils";
 import { VerificationMethod } from "did-resolver";
-import { createECDH } from "node:crypto";
-import { secp256k1, schnorr } from "@noble/curves/secp256k1";
+import { secp256k1 } from "@noble/curves/secp256k1";
 import { sha256 } from "@noble/hashes/sha256";
+import * as crypto from 'node:crypto';
+import { JsonWebKey } from "did-jwt/lib/util";
 
 export class Secp256k1 extends CryptoKey {
   constructor() {
@@ -17,13 +18,13 @@ export class Secp256k1 extends CryptoKey {
   }
 
   createPrivateKey() {
-    const key = createECDH("secp256k1");
+    const key = crypto.createECDH("secp256k1");
     key.generateKeys();
     this.initialisePrivateKey(this.hexToBytes(key.getPrivateKey("hex")));
   }
 
   initialisePrivateKey(key: any): void {
-    const secpkey = createECDH("secp256k1");
+    const secpkey = crypto.createECDH("secp256k1");
     secpkey.setPrivateKey(key);
     this.privateKeyBytes = key;
     this.publicKeyBytes = this.hexToBytes(
@@ -37,12 +38,17 @@ export class Secp256k1 extends CryptoKey {
     return this.hexToBytes(uncompressedHex);
   }
 
-  toJWK() {
+  toJWK():crypto.JsonWebKey {
+    const uncompressed = this.compressedToUncompressed(this.publicKey());
     return {
       kty: "EC",
       crv: "secp256k1",
-      x: Buffer.from(this.publicKeyBytes!.slice(1, 33)).toString("base64url"),
-      y: Buffer.from(this.publicKeyBytes!.slice(33)).toString("base64url"),
+      kid: this.bytesToHex(this.publicKey()),
+      use: 'sig',
+      key_ops: ['verify'],
+      alg: 'ES256',
+      x: Buffer.from(uncompressed.slice(1, 33)).toString("base64url"),
+      y: Buffer.from(uncompressed.slice(33)).toString("base64url"),
     };
   }
 
@@ -85,11 +91,7 @@ export class Secp256k1 extends CryptoKey {
     switch (publicKeyFormat) {
       case SupportedVerificationMethods.JsonWebKey2020:
       case SupportedVerificationMethods.EcdsaSecp256r1VerificationKey2019:
-        verificationMethod.publicKeyJwk = createJWK(
-          "Secp256k1",
-          this.publicKey(),
-          "sig",
-        );
+        verificationMethod.publicKeyJwk = this.toJWK() as JsonWebKey;
         break;
       case SupportedVerificationMethods.Multikey:
       case SupportedVerificationMethods.EcdsaSecp256k1VerificationKey2019:
@@ -149,19 +151,15 @@ export class Secp256k1 extends CryptoKey {
     const signature = secp256k1.sign(msgHash, this.privateKey());
 
     if (algorithm == "ES256K-R") {
-      return new Uint8Array([
-        ...schnorr.utils.numberToBytesBE(signature.r, 32),
-        ...schnorr.utils.numberToBytesBE(signature.s, 32),
-        signature.recovery,
-      ]);
+      const signatureWithRecovery = new Uint8Array(65);
+      signatureWithRecovery.set(signature.toCompactRawBytes(), 0);
+      signatureWithRecovery[64] = signature.recovery;
+      return signatureWithRecovery;
     }
-    return new Uint8Array([
-      ...schnorr.utils.numberToBytesBE(signature.r, 32),
-      ...schnorr.utils.numberToBytesBE(signature.s, 32),
-    ]);
+    return signature.toCompactRawBytes();
   }
 
-  async verify(algorithm: string, signature: string, data: Uint8Array) {
+  async verify(algorithm: string, signature: Uint8Array, data: Uint8Array) {
     if (!this.algorithms().includes(algorithm)) {
       throw new Error(
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
@@ -169,11 +167,17 @@ export class Secp256k1 extends CryptoKey {
     }
 
     const messageHash = sha256(data);
-    const isValid = secp256k1.verify(
-      this.hexToBytes(signature),
+    let isValid = false;
+    if (algorithm == "ES256K-R") {
+      signature = signature.slice(0, 64);
+    }
+
+    isValid = secp256k1.verify(
+      signature,
       messageHash,
       this.publicKey(),
     );
+
     if (isValid) {
       return true;
     }

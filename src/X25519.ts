@@ -59,7 +59,7 @@ export class X25519 extends CryptoKey {
     const publicKeyFormat: SupportedVerificationMethods =
       method || SupportedVerificationMethods.JsonWebKey2020;
 
-    const keyMultibase = this.makeDidKeyIdentifier();
+    const keyMultibase = this.toDIDKey();
     const did = "did:key:" + keyMultibase;
     const verificationMethod: VerificationMethod = {
       id: `${did}#${keyMultibase}`,

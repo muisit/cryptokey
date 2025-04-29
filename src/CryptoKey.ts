@@ -2,6 +2,7 @@ import { fromString, toString } from "uint8arrays";
 import { BaseName, encode } from "multibase";
 import { varint } from "multiformats";
 import { IKey } from "@veramo/core-types";
+import * as crypto from 'node:crypto';
 
 export enum SupportedVerificationMethods {
   "JsonWebKey2020",
@@ -38,11 +39,6 @@ export const contextFromKeyFormat: Record<string, string | object> = {
   },
 };
 
-export interface JWK {
-  kty: string;
-  [x: string]: any;
-}
-
 export abstract class CryptoKey {
   public keyType: string;
   public privateKeyBytes: Uint8Array | null;
@@ -58,7 +54,7 @@ export abstract class CryptoKey {
 
   abstract createPrivateKey(): void;
   abstract algorithms(): string[];
-  abstract toJWK(): JWK;
+  abstract toJWK(): crypto.JsonWebKey;
   abstract importFromDid(didKey: string): void;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -76,33 +72,32 @@ export abstract class CryptoKey {
   }
 
   abstract signBytes(algorithm: string, data: Uint8Array): Promise<Uint8Array>;
-  sign(
+  async sign(
     algorithm: string,
     data: Uint8Array,
     encode: string = "raw",
   ): Promise<string> {
-    return this.signBytes(algorithm, data).then((signature: Uint8Array) => {
-      switch (encode) {
-        default:
-        case "raw":
-          break;
-        case "base16":
-        case "hex":
-          return toString(signature, "base16");
-        case "base58btc":
-          return toString(signature, "base58btc");
-        case "base64":
-          return toString(signature, "base64");
-        case "base64url":
-          return toString(signature, "base64url");
-      }
-      return signature;
-    });
+    const signature = await this.signBytes(algorithm, data);
+    switch (encode) {
+      default:
+      case "raw":
+        break;
+      case "base16":
+      case "hex":
+        return toString(signature, "base16");
+      case "base58btc":
+        return toString(signature, "base58btc");
+      case "base64":
+        return toString(signature, "base64");
+      case "base64url":
+        return toString(signature, "base64url");
+    }
+    throw new Error("unable to encode resulting signature using " + encode);
   }
 
   abstract verify(
     algorithm: string,
-    signature: string,
+    signature: Uint8Array,
     data: Uint8Array,
   ): Promise<boolean>;
 
@@ -120,6 +115,18 @@ export abstract class CryptoKey {
       input = `0${input}`;
     }
     return fromString(input, "base16");
+  }
+  public bytesToBase64(bytes:Uint8Array):string {
+    return toString(bytes, "base64");
+  }
+  public base64ToBytes(buffer:string) {
+    return fromString(buffer, "base64");
+  }
+  public bytesToBase64Url(bytes:Uint8Array):string {
+    return toString(bytes, "base64url");
+  }
+  public base64UrlToBytes(buffer:string) {
+    return fromString(buffer, "base64url");
   }
 
   hasPublicKey(): boolean {

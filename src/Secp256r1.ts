@@ -3,11 +3,12 @@ import {
   CryptoKey,
   SupportedVerificationMethods,
 } from "./CryptoKey";
-import { multibaseToBytes, createJWK } from "@veramo/utils";
+import { multibaseToBytes } from "@veramo/utils";
 import { VerificationMethod } from "did-resolver";
-import { createECDH } from "node:crypto";
+import * as crypto from "node:crypto";
 import { p256 } from "@noble/curves/p256";
 import { sha256 } from "@noble/hashes/sha256";
+import { JsonWebKey } from "did-jwt/lib/util";
 
 /* NIST secp256r1 aka p256 aka prime256v1
  * https://www.secg.org/sec2-v2.pdf
@@ -21,13 +22,13 @@ export class Secp256r1 extends CryptoKey {
   }
 
   createPrivateKey() {
-    const key = createECDH("prime256v1");
+    const key = crypto.createECDH("prime256v1");
     key.generateKeys();
     this.initialisePrivateKey(this.hexToBytes(key.getPrivateKey("hex")));
   }
 
   initialisePrivateKey(key: any): void {
-    const secpkey = createECDH("prime256v1");
+    const secpkey = crypto.createECDH("prime256v1");
     secpkey.setPrivateKey(key);
     this.privateKeyBytes = key;
     this.publicKeyBytes = this.hexToBytes(
@@ -41,12 +42,17 @@ export class Secp256r1 extends CryptoKey {
     return this.hexToBytes(uncompressedHex);
   }
 
-  toJWK() {
+  toJWK():crypto.JsonWebKey {
+    const uncompressed = this.compressedToUncompressed(this.publicKey());
     return {
       kty: "EC",
       crv: "P-256",
-      x: Buffer.from(this.publicKeyBytes!.slice(1, 33)).toString("base64url"),
-      y: Buffer.from(this.publicKeyBytes!.slice(33)).toString("base64url"),
+      kid: this.bytesToHex(this.publicKey()),
+      use: 'sig',
+      key_ops: ['verify'],
+      alg: 'ES256',
+      x: Buffer.from(uncompressed.slice(1, 33)).toString("base64url"),
+      y: Buffer.from(uncompressed.slice(33)).toString("base64url"),
     };
   }
 
@@ -83,11 +89,7 @@ export class Secp256r1 extends CryptoKey {
     switch (publicKeyFormat) {
       case SupportedVerificationMethods.JsonWebKey2020:
       case SupportedVerificationMethods.EcdsaSecp256r1VerificationKey2019:
-        verificationMethod.publicKeyJwk = createJWK(
-          "Secp256r1",
-          this.publicKey(),
-          "sig",
-        );
+        verificationMethod.publicKeyJwk = this.toJWK() as JsonWebKey;
         break;
       case SupportedVerificationMethods.Multikey:
       case SupportedVerificationMethods.EcdsaSecp256k1VerificationKey2019:
@@ -149,7 +151,7 @@ export class Secp256r1 extends CryptoKey {
     return new Uint8Array([...rBytes, ...sBytes]);
   }
 
-  async verify(algorithm: string, signature: string, data: Uint8Array) {
+  async verify(algorithm: string, signature: Uint8Array, data: Uint8Array) {
     if (!this.algorithms().includes(algorithm)) {
       throw new Error(
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
@@ -158,7 +160,7 @@ export class Secp256r1 extends CryptoKey {
 
     const messageHash = sha256(data);
     const isValid = p256.verify(
-      this.hexToBytes(signature),
+      signature,
       messageHash,
       this.publicKey(),
     );

@@ -3,13 +3,15 @@ import {
   CryptoKey,
   SupportedVerificationMethods,
 } from "./CryptoKey";
-import { multibaseToBytes, bytesToBase58, createJWK } from "@veramo/utils";
+import { multibaseToBytes, bytesToBase58 } from "@veramo/utils";
 import {
   DIDDocument,
   DIDResolutionResult,
   VerificationMethod,
 } from "did-resolver";
 import { ed25519 } from "@noble/curves/ed25519";
+import { JsonWebKey } from "did-jwt/lib/util";
+import * as crypto from 'node:crypto';
 
 export class Ed25519 extends CryptoKey {
   constructor() {
@@ -27,10 +29,14 @@ export class Ed25519 extends CryptoKey {
     this.publicKeyBytes = ed25519.getPublicKey(this.privateKeyBytes!);
   }
 
-  toJWK() {
+  toJWK():crypto.JsonWebKey {
     return {
       kty: "OKP",
       crv: "Ed25519",
+      kid: this.bytesToHex(this.publicKey()),
+      use: 'sig',
+      key_ops: ['verify'],
+      alg: 'EdDSA',
       x: Buffer.from(this.publicKeyBytes!).toString("base64url"),
     };
   }
@@ -65,11 +71,7 @@ export class Ed25519 extends CryptoKey {
     //let keyAgreementKeyFormat:SupportedVerificationMethods = publicKeyFormat;
     switch (publicKeyFormat) {
       case SupportedVerificationMethods.JsonWebKey2020:
-        verificationMethod.publicKeyJwk = createJWK(
-          this.keyType as any,
-          this.publicKey(),
-          "sig",
-        );
+        verificationMethod.publicKeyJwk = this.toJWK() as JsonWebKey;
         break;
       case SupportedVerificationMethods.Multikey:
         verificationMethod.publicKeyMultibase = keyMultibase;
@@ -136,17 +138,16 @@ export class Ed25519 extends CryptoKey {
     return ed25519.sign(data, this.privateKey());
   }
 
-  async verify(algorithm: string, signature: string, data: Uint8Array) {
+  async verify(algorithm: string, signature: Uint8Array, data: Uint8Array) {
     if (!this.algorithms().includes(algorithm)) {
       throw new Error(
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
       );
     }
 
-    const isValid = ed25519.verify(
+    const isValid = ed25519.verify(signature,
       Buffer.from(data),
-      this.publicKey(),
-      Buffer.from(this.hexToBytes(signature)),
+      this.publicKey()
     );
     if (isValid) {
       return true;

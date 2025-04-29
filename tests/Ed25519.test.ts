@@ -1,6 +1,7 @@
 import { test, expect } from "vitest";
 import { TKeyType } from "@veramo/core-types";
 import { Ed25519 } from "../src/Ed25519";
+import * as crypto from 'node:crypto';
 
 test("Initialise key", () => {
   const key = new Ed25519();
@@ -166,5 +167,23 @@ test("verify", async () => {
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
   const signature = await key.sign("EdDSA", message, "base64url");
-  expect(key.verify("EdDSA", signature, message)).toBeTruthy();
+  expect(signature).toBe("9Ud-wtY9H6nftjYnPdKu0nK48yV42EZWjMH5ahq-r6BEl5THBh8ze4_Tr816zIYQKocMgLs8H1Tu8uaTHLbqBg");
+  const sigbytes = key.base64UrlToBytes(signature);
+  expect(sigbytes.length).toBe(64);
+  expect(await key.verify("EdDSA", sigbytes, message)).toBeTruthy();
+});
+
+test('toJWK', async () => {
+  const key = new Ed25519();
+  key.initialisePrivateKey(
+    key.hexToBytes(
+      "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
+    ),
+  );
+  expect(key.hasPrivateKey()).toBeTruthy();
+  const jwk = key.toJWK();
+  const ckey = await crypto.subtle.importKey('jwk', jwk as crypto.JsonWebKey, 'Ed25519', false, jwk.key_ops as KeyUsage[]);
+  expect(ckey).toBeDefined();
+  expect(ckey.type).toBe('public');
+  expect(ckey.usages).toStrictEqual(jwk.key_ops);
 });

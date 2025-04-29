@@ -1,6 +1,7 @@
 import { test, expect } from "vitest";
 import { TKeyType } from "@veramo/core-types";
 import { Secp256k1 } from "../src/Secp256k1";
+import * as crypto from 'node:crypto';
 
 test("Initialise key", () => {
   const key = new Secp256k1();
@@ -168,8 +169,23 @@ test("verify", async () => {
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
   const signature = await key.sign("ES256K", message, "base64url");
-  expect(key.verify("ES256K", signature, message)).toBeTruthy();
+  expect(signature).toBe('Bu-qTAWcAU9vtkfEnhBohuSntoXPv90qVnq6w-8gbDQv9Coe1I8B448H9P-vxJXBe9TFi2CVgkrAjAJIczxhpg');
+  expect(key.verify("ES256K", key.base64UrlToBytes(signature), message)).toBeTruthy();
 
-  const signature2 = await key.sign("ES256K-R", message, "base64url");
-  expect(key.verify("ES256K-R", signature2, message)).toBeTruthy();
+  const signature2 = await key.sign("ES256K-R", message, "hex");
+  expect(signature2).toBe('06efaa4c059c014f6fb647c49e106886e4a7b685cfbfdd2a567abac3ef206c342ff42a1ed48f01e38f07f4ffafc495c17bd4c58b6095824ac08c0248733c61a601');
+  expect(await key.verify("ES256K-R", key.hexToBytes(signature2), message)).toBeTruthy();
+});
+
+
+test('toJWK', async () => {
+  const key = new Secp256k1();
+  key.initialisePrivateKey(
+    key.hexToBytes(
+      "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
+    ),
+  );
+  expect(key.hasPrivateKey()).toBeTruthy();
+  const jwk = key.toJWK();
+  expect(jwk.crv).toBe('secp256k1')  
 });
