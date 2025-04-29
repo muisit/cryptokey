@@ -75,7 +75,6 @@ export abstract class CryptoKey {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   abstract signBytes(algorithm:string, data:Uint8Array): Promise<Uint8Array>;
   sign(algorithm: string, data: Uint8Array, encode:string = 'raw'): Promise<string> {
     return this.signBytes(algorithm, data)

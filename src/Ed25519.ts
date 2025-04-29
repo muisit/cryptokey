@@ -143,14 +143,9 @@ export class Ed25519 extends CryptoKey {
       );
     }
 
-    try {
-      const isValid = ed25519.verify(Buffer.from(data), this.publicKey(), Buffer.from(this.hexToBytes(signature)));
-      if (isValid) {
-        return true;
-      }
-    }
-    catch (e) {
-
+    const isValid = ed25519.verify(Buffer.from(data), this.publicKey(), Buffer.from(this.hexToBytes(signature)));
+    if (isValid) {
+      return true;
     }
     return false;
   }

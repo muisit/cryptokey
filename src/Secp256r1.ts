@@ -5,7 +5,7 @@ import {
 } from "./CryptoKey";
 import { multibaseToBytes, createJWK } from "@veramo/utils";
 import { VerificationMethod } from "did-resolver";
-import { createECDH, sign } from "node:crypto";
+import { createECDH } from "node:crypto";
 import { p256 } from '@noble/curves/p256';
 import { sha256 } from '@noble/hashes/sha256';
 
@@ -156,15 +156,10 @@ export class Secp256r1 extends CryptoKey {
       );
     }
 
-    try {
-      const messageHash = sha256(data);
-      const isValid = p256.verify(this.hexToBytes(signature), messageHash, this.publicKey());
-      if (isValid) {
-        return true;
-      }
-    }
-    catch (e) {
-
+    const messageHash = sha256(data);
+    const isValid = p256.verify(this.hexToBytes(signature), messageHash, this.publicKey());
+    if (isValid) {
+      return true;
     }
     return false;
   }
