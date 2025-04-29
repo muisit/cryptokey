@@ -5,7 +5,10 @@
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "repository": "https://github.com/muisit/cryptokey",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muisit/cryptokey.git"
+  },
   "author": "muisIT",
   "license": "Apache-2.0",
   "private": false,
