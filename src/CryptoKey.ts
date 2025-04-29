@@ -93,6 +93,8 @@ export abstract class CryptoKey {
       });
   }
 
+  abstract verify(algorithm:string, signature:string, data:Uint8Array): Promise<boolean>;
+
   initialisePrivateKey(key: any) {
     this.privateKeyBytes = key;
   }

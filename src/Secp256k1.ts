@@ -1,13 +1,13 @@
 import {
   contextFromKeyFormat,
   CryptoKey,
-  SupportedVerificationMethods,
+  SupportedVerificationMethods
 } from "./CryptoKey";
-import { ES256KSigner } from "did-jwt";
 import { multibaseToBytes, createJWK } from "@veramo/utils";
 import { VerificationMethod } from "did-resolver";
-import { createECDH } from "node:crypto";
-import { fromString } from 'uint8arrays';
+import { createECDH, sign, verify } from "node:crypto";
+import { secp256k1, schnorr } from '@noble/curves/secp256k1';
+import { sha256 } from '@noble/hashes/sha256';
 
 export class Secp256k1 extends CryptoKey {
   constructor() {
@@ -29,6 +29,12 @@ export class Secp256k1 extends CryptoKey {
     this.publicKeyBytes = this.hexToBytes(
       secpkey.getPublicKey("hex", "compressed"),
     );
+  }
+
+  compressedToUncompressed(key:Uint8Array) {
+    const point = secp256k1.ProjectivePoint.fromHex(this.bytesToHex(key));
+    const uncompressedHex = point.toHex(false);
+    return this.hexToBytes(uncompressedHex);
   }
 
   toJWK() {
@@ -138,9 +144,33 @@ export class Secp256k1 extends CryptoKey {
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
       );
     }
-    const signer = ES256KSigner(this.privateKey(), algorithm === "ES256K-R");
-    const signature = await signer(data);
-    // base64url encoded string
-    return fromString(signature as string, 'base64url');
+
+    const msgHash = sha256(data);
+    const signature = secp256k1.sign(msgHash, this.privateKey());
+
+    if (algorithm == "ES256K-R") {
+      return new Uint8Array([...schnorr.utils.numberToBytesBE(signature.r, 32), ...schnorr.utils.numberToBytesBE(signature.s, 32), signature.recovery]);
+    }
+    return new Uint8Array([...schnorr.utils.numberToBytesBE(signature.r, 32), ...schnorr.utils.numberToBytesBE(signature.s, 32)]);
+  }
+
+  async verify(algorithm:string, signature:string, data:Uint8Array) {
+    if (!this.algorithms().includes(algorithm)) {
+      throw new Error(
+        "Algorithm " + algorithm + " not supported on key type " + this.keyType,
+      );
+    }
+
+    try {
+      const messageHash = sha256(data);
+      const isValid = secp256k1.verify(this.hexToBytes(signature), messageHash, this.publicKey());
+      if (isValid) {
+        return true;
+      }
+    }
+    catch (e) {
+
+    }
+    return false;
   }
 }

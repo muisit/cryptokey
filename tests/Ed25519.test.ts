@@ -115,3 +115,12 @@ test('signature', async () => {
     const signaturehex = await key.sign('EdDSA', message, 'hex');
     expect(signaturehex).toBe('f5477ec2d63d1fa9dfb636273dd2aed272b8f32578d846568cc1f96a1abeafa0449794c7061f337b8fd3afcd7acc86102a870c80bb3c1f54eef2e6931cb6ea06');
 })
+
+test('verify', async() => {
+    const key = new Ed25519();
+    key.initialisePrivateKey(key.hexToBytes('fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8'));
+    expect(key.hasPrivateKey()).toBeTruthy();
+    const message = Buffer.from('Message Data', 'utf-8');
+    const signature = await key.sign('EdDSA', message, 'base64url');
+    expect(key.verify('EdDSA', signature, message)).toBeTruthy();
+});

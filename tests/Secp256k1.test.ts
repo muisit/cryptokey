@@ -115,3 +115,17 @@ test('signature', async () => {
     const signaturehex = await key.sign('ES256K', message, 'hex');
     expect(signaturehex).toBe('06efaa4c059c014f6fb647c49e106886e4a7b685cfbfdd2a567abac3ef206c342ff42a1ed48f01e38f07f4ffafc495c17bd4c58b6095824ac08c0248733c61a6');
 })
+
+
+test('verify', async() => {
+    const key = new Secp256k1();
+    key.initialisePrivateKey(key.hexToBytes('e241c43ce7bbee7181be7788c46d9150b4dd1a4dd1f3ff66fe1b802b5e32ecb1'));
+    expect(key.hasPrivateKey()).toBeTruthy();
+    const message = Buffer.from('Message Data', 'utf-8');
+    const signature = await key.sign('ES256K', message, 'base64url');
+    expect(key.verify('ES256K', signature, message)).toBeTruthy();
+
+    const signature2 = await key.sign('ES256K-R', message, 'base64url');
+    expect(key.verify('ES256K-R', signature2, message)).toBeTruthy();
+
+});

@@ -3,15 +3,13 @@ import {
   CryptoKey,
   SupportedVerificationMethods,
 } from "./CryptoKey";
-import { ed25519 } from "@noble/curves/ed25519";
-import { EdDSASigner } from "did-jwt";
 import { multibaseToBytes, bytesToBase58, createJWK } from "@veramo/utils";
 import {
   DIDDocument,
   DIDResolutionResult,
   VerificationMethod,
 } from "did-resolver";
-import { fromString } from 'uint8arrays'
+import { ed25519 } from '@noble/curves/ed25519';
 
 export class Ed25519 extends CryptoKey {
   constructor() {
@@ -24,9 +22,9 @@ export class Ed25519 extends CryptoKey {
     this.initialisePrivateKey(ed25519.utils.randomPrivateKey());
   }
 
-  initialisePrivateKey(key?: Uint8Array): void {
-    this.privateKeyBytes = key ?? ed25519.utils.randomPrivateKey();
-    this.publicKeyBytes = ed25519.getPublicKey(this.privateKeyBytes);
+  initialisePrivateKey(keyData?: Uint8Array): void {
+    this.privateKeyBytes = keyData ?? ed25519.utils.randomPrivateKey();
+    this.publicKeyBytes = ed25519.getPublicKey(this.privateKeyBytes!);
   }
 
   toJWK() {
@@ -135,9 +133,25 @@ export class Ed25519 extends CryptoKey {
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
       );
     }
-    const signer = EdDSASigner(this.privateKey());
-    const signature = await signer(data);
-    // base64url encoded string
-    return fromString(signature as string, 'base64url');
+    return ed25519.sign(data, this.privateKey());
+  }
+
+  async verify(algorithm:string, signature:string, data:Uint8Array) {
+    if (!this.algorithms().includes(algorithm)) {
+      throw new Error(
+        "Algorithm " + algorithm + " not supported on key type " + this.keyType,
+      );
+    }
+
+    try {
+      const isValid = ed25519.verify(Buffer.from(data), this.publicKey(), Buffer.from(this.hexToBytes(signature)));
+      if (isValid) {
+        return true;
+      }
+    }
+    catch (e) {
+
+    }
+    return false;
   }
 }

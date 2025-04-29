@@ -7,6 +7,16 @@ import { x25519 } from "@noble/curves/ed25519";
 import { multibaseToBytes, bytesToBase58, createJWK } from "@veramo/utils";
 import { VerificationMethod } from "did-resolver";
 
+/* 
+ * Curve25519 is an elliptic curve designed for use in the Diffie-Hellman key agreement scheme (ECDH).
+ * https://en.wikipedia.org/wiki/Curve25519
+ *
+ * https://www.amazon.science/blog/better-performing-25519-elliptic-curve-cryptography
+ * The x25519 algorithm is a key agreement algorithm, used to securely establish a shared secret between two peers.
+ * 
+ * Hence, although the key is supported in this library, it is not usable for signing or verification.
+ */
+
 export class X25519 extends CryptoKey {
   constructor() {
     super();
@@ -111,6 +121,20 @@ export class X25519 extends CryptoKey {
   }
 
   algorithms() {
-    return ["ECDH", "ECDH-ES", "ECDH-1PU"];
+    return [];
+  }
+
+  async signBytes(algorithm: string, data: Uint8Array) {
+    throw new Error(
+      "Algorithm " + algorithm + " not supported on key type " + this.keyType,
+    );
+    return new Uint8Array();
+  }
+
+  async verify(algorithm:string, data:Uint8Array) {
+    throw new Error(
+      "Algorithm " + algorithm + " not supported on key type " + this.keyType,
+    );
+    return false;
   }
 }
