@@ -133,7 +133,7 @@ export class X25519 extends CryptoKey {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async verify(algorithm: string, signature: string, data: Uint8Array) {
+  async verify(algorithm: string, signature: Uint8Array, data: Uint8Array) {
     throw new Error(
       "Algorithm " + algorithm + " not supported on key type " + this.keyType,
     );
