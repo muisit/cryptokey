@@ -56,13 +56,14 @@ export class Secp256r1 extends CryptoKey {
     };
   }
 
-  importFromJWK(jwk:JsonWebKey) {
-    if (jwk.kty == 'EC' && jwk.crv == 'P-256' && jwk.x && jwk.y) {
+  importFromJWK(jwk: JsonWebKey) {
+    if (jwk.kty == "EC" && jwk.crv == "P-256" && jwk.x && jwk.y) {
       const uncompressed = new Uint8Array(65);
       uncompressed.set([0x04], 0);
       uncompressed.set(this.base64UrlToBytes(jwk.x), 1);
       uncompressed.set(this.base64UrlToBytes(jwk.y), 33);
-      this.publicKeyBytes = p256.ProjectivePoint.fromHex(uncompressed).toRawBytes(true);
+      this.publicKeyBytes =
+        p256.ProjectivePoint.fromHex(uncompressed).toRawBytes(true);
     }
   }
 

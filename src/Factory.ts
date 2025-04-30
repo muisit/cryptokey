@@ -77,26 +77,26 @@ export const Factory = {
     return key;
   },
 
-  createFromJWK(jwk:JsonWebKey): CryptoKey {
-    let key:CryptoKey|null = null;
+  createFromJWK(jwk: JsonWebKey): CryptoKey {
+    let key: CryptoKey | null = null;
 
     switch (jwk.kty) {
-      case 'OKP':
+      case "OKP":
         switch (jwk.crv) {
-          case 'Ed25519':
+          case "Ed25519":
             key = new Ed25519();
             break;
-          case 'X25519':
+          case "X25519":
             key = new X25519();
             break;
         }
         break;
-      case 'EC':
+      case "EC":
         switch (jwk.crv) {
-          case 'P-256':
+          case "P-256":
             key = new Secp256r1();
             break;
-          case 'secp256k1':
+          case "secp256k1":
             key = new Secp256k1();
             break;
         }
@@ -107,5 +107,5 @@ export const Factory = {
     }
     key.importFromJWK(jwk);
     return key;
-  }
+  },
 };

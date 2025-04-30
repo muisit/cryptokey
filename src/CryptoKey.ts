@@ -55,7 +55,7 @@ export abstract class CryptoKey {
   abstract createPrivateKey(): void;
   abstract algorithms(): string[];
   abstract toJWK(): crypto.JsonWebKey;
-  abstract importFromJWK(jwk:JsonWebKey): void;
+  abstract importFromJWK(jwk: JsonWebKey): void;
   abstract importFromDid(didKey: string): void;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

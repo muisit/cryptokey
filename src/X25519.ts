@@ -44,8 +44,8 @@ export class X25519 extends CryptoKey {
     };
   }
 
-  importFromJWK(jwk:JsonWebKey) {
-    if (jwk.kty == 'OKP' && jwk.crv == 'X25519' && jwk.x) {
+  importFromJWK(jwk: JsonWebKey) {
+    if (jwk.kty == "OKP" && jwk.crv == "X25519" && jwk.x) {
       this.publicKeyBytes = this.base64UrlToBytes(jwk.x);
     }
   }

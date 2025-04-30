@@ -3,8 +3,10 @@ import { TKeyType } from "@veramo/core-types";
 import { Ed25519 } from "../src/Ed25519";
 import * as crypto from "node:crypto";
 
-const privkeyhex = "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8";
-const pubkeyhex =  "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39";
+const privkeyhex =
+  "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8";
+const pubkeyhex =
+  "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39";
 
 test("Initialise key", () => {
   const key = new Ed25519();
@@ -21,9 +23,7 @@ test("Initialise key", () => {
 
 test("import private key", () => {
   const key = new Ed25519();
-  key.initialisePrivateKey(
-    key.hexToBytes(privkeyhex),
-  );
+  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.privateKeyBytes === null).toBeFalsy();
   expect(key.privateKeyBytes!.length).toBe(32);
@@ -47,9 +47,7 @@ test("import from DID", () => {
 
 test("export to DID", () => {
   const key = new Ed25519();
-  key.initialisePrivateKey(
-    key.hexToBytes(privkeyhex),
-  );
+  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.toDIDKey()).toBe(
     "z6Mkkf9RiKeaAFaQzQGT2zfqqwCYYbPTNhQvyGXjKJ84kW88",
@@ -62,10 +60,8 @@ test("import from managed key", () => {
     kid: pubkeyhex,
     type: "Ed25519" as TKeyType,
     kms: "default",
-    publicKeyHex:
-    pubkeyhex,
-    privateKeyHex:
-      privkeyhex,
+    publicKeyHex: pubkeyhex,
+    privateKeyHex: privkeyhex,
   };
   key.importFromManagedKey(mkey);
 
@@ -85,8 +81,7 @@ test("import from managed public key", () => {
     kid: pubkeyhex,
     type: "Ed25519" as TKeyType,
     kms: "default",
-    publicKeyHex:
-    pubkeyhex,
+    publicKeyHex: pubkeyhex,
   };
   key.importFromManagedKey(mkey);
 
@@ -95,16 +90,12 @@ test("import from managed public key", () => {
   expect(key.hasPublicKey()).toBeTruthy();
   expect(key.publicKeyBytes === null).toBeFalsy();
   expect(key.publicKeyBytes!.length).toBe(32);
-  expect(key.exportPublicKey()).toBe(
-    pubkeyhex
-  );
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
 test("signature", async () => {
   const key = new Ed25519();
-  key.initialisePrivateKey(
-    key.hexToBytes(privkeyhex),
-  );
+  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
   const signature = await key.sign("EdDSA", message, "base64url");
@@ -130,9 +121,7 @@ test("signature", async () => {
 
 test("verify", async () => {
   const key = new Ed25519();
-  key.initialisePrivateKey(
-    key.hexToBytes(privkeyhex),
-  );
+  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
   const signature = await key.sign("EdDSA", message, "base64url");
@@ -146,9 +135,7 @@ test("verify", async () => {
 
 test("create JWK", () => {
   const key = new Ed25519();
-  key.initialisePrivateKey(
-    key.hexToBytes(privkeyhex),
-  );
+  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
 
   const jwk = key.toJWK();
@@ -160,9 +147,9 @@ test("create JWK", () => {
 
 test("import JWK", () => {
   const jwk = {
-    kty: 'OKP',
-    crv: 'Ed25519',
-    x: 'XDGbjC1IAyAmc-0askvTQluRTUJIGWesTNk8z8feyzk'
+    kty: "OKP",
+    crv: "Ed25519",
+    x: "XDGbjC1IAyAmc-0askvTQluRTUJIGWesTNk8z8feyzk",
   };
   const key = new Ed25519();
   key.importFromJWK(jwk);
