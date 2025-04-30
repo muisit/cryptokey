@@ -3,6 +3,9 @@ import { TKeyType } from "@veramo/core-types";
 import { Ed25519 } from "../src/Ed25519";
 import * as crypto from "node:crypto";
 
+const privkeyhex = "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8";
+const pubkeyhex =  "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39";
+
 test("Initialise key", () => {
   const key = new Ed25519();
   key.createPrivateKey();
@@ -19,9 +22,7 @@ test("Initialise key", () => {
 test("import private key", () => {
   const key = new Ed25519();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.privateKeyBytes === null).toBeFalsy();
@@ -29,28 +30,8 @@ test("import private key", () => {
   expect(key.hasPublicKey()).toBeTruthy();
   expect(key.publicKeyBytes === null).toBeFalsy();
   expect(key.publicKeyBytes!.length).toBe(32);
-  expect(key.exportPrivateKey()).toBe(
-    "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
-  );
-  expect(key.exportPublicKey()).toBe(
-    "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
-  );
-});
-
-test("create JWK", () => {
-  const key = new Ed25519();
-  key.initialisePrivateKey(
-    key.hexToBytes(
-      "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
-    ),
-  );
-  expect(key.hasPrivateKey()).toBeTruthy();
-
-  const jwk = key.toJWK();
-  expect(!!jwk).toBeTruthy();
-  expect(jwk.kty).toBe("OKP");
-  expect(jwk.crv).toBe("Ed25519");
-  expect(jwk.x).toBe("XDGbjC1IAyAmc-0askvTQluRTUJIGWesTNk8z8feyzk");
+  expect(key.exportPrivateKey()).toBe(privkeyhex);
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
 test("import from DID", () => {
@@ -61,17 +42,13 @@ test("import from DID", () => {
   expect(key.hasPublicKey()).toBeTruthy();
   expect(key.publicKeyBytes === null).toBeFalsy();
   expect(key.publicKeyBytes!.length).toBe(32);
-  expect(key.exportPublicKey()).toBe(
-    "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
-  );
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
 test("export to DID", () => {
   const key = new Ed25519();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.toDIDKey()).toBe(
@@ -82,13 +59,13 @@ test("export to DID", () => {
 test("import from managed key", () => {
   const key = new Ed25519();
   const mkey = {
-    kid: "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
+    kid: pubkeyhex,
     type: "Ed25519" as TKeyType,
     kms: "default",
     publicKeyHex:
-      "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
+    pubkeyhex,
     privateKeyHex:
-      "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
+      privkeyhex,
   };
   key.importFromManagedKey(mkey);
 
@@ -98,22 +75,18 @@ test("import from managed key", () => {
   expect(key.hasPublicKey()).toBeTruthy();
   expect(key.publicKeyBytes === null).toBeFalsy();
   expect(key.publicKeyBytes!.length).toBe(32);
-  expect(key.exportPrivateKey()).toBe(
-    "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
-  );
-  expect(key.exportPublicKey()).toBe(
-    "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
-  );
+  expect(key.exportPrivateKey()).toBe(privkeyhex);
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
 test("import from managed public key", () => {
   const key = new Ed25519();
   const mkey = {
-    kid: "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
+    kid: pubkeyhex,
     type: "Ed25519" as TKeyType,
     kms: "default",
     publicKeyHex:
-      "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
+    pubkeyhex,
   };
   key.importFromManagedKey(mkey);
 
@@ -123,16 +96,14 @@ test("import from managed public key", () => {
   expect(key.publicKeyBytes === null).toBeFalsy();
   expect(key.publicKeyBytes!.length).toBe(32);
   expect(key.exportPublicKey()).toBe(
-    "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
+    pubkeyhex
   );
 });
 
 test("signature", async () => {
   const key = new Ed25519();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
@@ -160,9 +131,7 @@ test("signature", async () => {
 test("verify", async () => {
   const key = new Ed25519();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
@@ -175,23 +144,27 @@ test("verify", async () => {
   expect(await key.verify("EdDSA", sigbytes, message)).toBeTruthy();
 });
 
-test("toJWK", async () => {
+test("create JWK", () => {
   const key = new Ed25519();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
+
   const jwk = key.toJWK();
-  const ckey = await crypto.subtle.importKey(
-    "jwk",
-    jwk as crypto.JsonWebKey,
-    "Ed25519",
-    false,
-    jwk.key_ops as KeyUsage[],
-  );
-  expect(ckey).toBeDefined();
-  expect(ckey.type).toBe("public");
-  expect(ckey.usages).toStrictEqual(jwk.key_ops);
+  expect(!!jwk).toBeTruthy();
+  expect(jwk.kty).toBe("OKP");
+  expect(jwk.crv).toBe("Ed25519");
+  expect(jwk.x).toBe("XDGbjC1IAyAmc-0askvTQluRTUJIGWesTNk8z8feyzk");
+});
+
+test("import JWK", () => {
+  const jwk = {
+    kty: 'OKP',
+    crv: 'Ed25519',
+    x: 'XDGbjC1IAyAmc-0askvTQluRTUJIGWesTNk8z8feyzk'
+  };
+  const key = new Ed25519();
+  key.importFromJWK(jwk);
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });

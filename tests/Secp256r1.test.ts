@@ -3,6 +3,9 @@ import { TKeyType } from "@veramo/core-types";
 import { Secp256r1 } from "../src/Secp256r1";
 import * as crypto from "node:crypto";
 
+const privkeyhex = "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11";
+const pubkeyhex = "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980";
+
 test("Initialise key", () => {
   const key = new Secp256r1();
   key.createPrivateKey();
@@ -19,9 +22,7 @@ test("Initialise key", () => {
 test("import private key", () => {
   const key = new Secp256r1();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.privateKeyBytes === null).toBeFalsy();
@@ -29,28 +30,8 @@ test("import private key", () => {
   expect(key.hasPublicKey()).toBeTruthy();
   expect(key.publicKeyBytes === null).toBeFalsy();
   expect(key.publicKeyBytes!.length).toBe(33);
-  expect(key.exportPrivateKey()).toBe(
-    "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
-  );
-  expect(key.exportPublicKey()).toBe(
-    "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
-  );
-});
-
-test("create JWK", () => {
-  const key = new Secp256r1();
-  key.initialisePrivateKey(
-    key.hexToBytes(
-      "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
-    ),
-  );
-  expect(key.hasPrivateKey()).toBeTruthy();
-
-  const jwk = key.toJWK();
-  expect(!!jwk).toBeTruthy();
-  expect(jwk.kty).toBe("EC");
-  expect(jwk.crv).toBe("P-256");
-  expect(jwk.x).toBe("xuJ5LJvgY5ageBUbyJ5vVTQSyrAAx-xxxbmSk4NW2YA");
+  expect(key.exportPrivateKey()).toBe(privkeyhex);
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
 test("import from DID", () => {
@@ -63,17 +44,13 @@ test("import from DID", () => {
   expect(key.hasPublicKey()).toBeTruthy();
   expect(key.publicKeyBytes === null).toBeFalsy();
   expect(key.publicKeyBytes!.length).toBe(33);
-  expect(key.exportPublicKey()).toBe(
-    "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
-  );
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
 test("export to DID", () => {
   const key = new Secp256r1();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.toDIDKey()).toBe(
@@ -84,13 +61,11 @@ test("export to DID", () => {
 test("import from managed key", () => {
   const key = new Secp256r1();
   const mkey = {
-    kid: "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
+    kid: pubkeyhex,
     type: "Ed25519" as TKeyType,
     kms: "default",
-    publicKeyHex:
-      "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
-    privateKeyHex:
-      "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
+    publicKeyHex: pubkeyhex,
+    privateKeyHex: privkeyhex,
   };
   key.importFromManagedKey(mkey);
 
@@ -100,22 +75,17 @@ test("import from managed key", () => {
   expect(key.hasPublicKey()).toBeTruthy();
   expect(key.publicKeyBytes === null).toBeFalsy();
   expect(key.publicKeyBytes!.length).toBe(33);
-  expect(key.exportPrivateKey()).toBe(
-    "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
-  );
-  expect(key.exportPublicKey()).toBe(
-    "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
-  );
+  expect(key.exportPrivateKey()).toBe(privkeyhex);
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
 test("import from managed public key", () => {
   const key = new Secp256r1();
   const mkey = {
-    kid: "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
+    kid: pubkeyhex,
     type: "Secp256r1" as TKeyType,
     kms: "default",
-    publicKeyHex:
-      "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
+    publicKeyHex: pubkeyhex,
   };
   key.importFromManagedKey(mkey);
 
@@ -124,17 +94,13 @@ test("import from managed public key", () => {
   expect(key.hasPublicKey()).toBeTruthy();
   expect(key.publicKeyBytes === null).toBeFalsy();
   expect(key.publicKeyBytes!.length).toBe(33);
-  expect(key.exportPublicKey()).toBe(
-    "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
-  );
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
 test("signature", async () => {
   const key = new Secp256r1();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
@@ -162,9 +128,7 @@ test("signature", async () => {
 test("verify", async () => {
   const key = new Secp256r1();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
@@ -177,12 +141,14 @@ test("verify", async () => {
 test("toJWK", async () => {
   const key = new Secp256r1();
   key.initialisePrivateKey(
-    key.hexToBytes(
-      "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11",
-    ),
+    key.hexToBytes(privkeyhex),
   );
   expect(key.hasPrivateKey()).toBeTruthy();
   const jwk = key.toJWK();
+  expect(jwk.kty).toBe('EC');
+  expect(jwk.crv).toBe('P-256');
+  expect(jwk.x).toBe("xuJ5LJvgY5ageBUbyJ5vVTQSyrAAx-xxxbmSk4NW2YA");
+  expect(jwk.y).toBe("ZHujYr-HhNmVrtdf4icztCM2eMJ6XCq42MwwuhkD6dE");
   const ckey = await crypto.subtle.importKey(
     "jwk",
     jwk as crypto.JsonWebKey,
@@ -196,4 +162,17 @@ test("toJWK", async () => {
   expect(ckey).toBeDefined();
   expect(ckey.type).toBe("public");
   expect(ckey.usages).toStrictEqual(jwk.key_ops);
+});
+
+
+test("import JWK", () => {
+  const jwk = {
+    kty: 'EC',
+    crv: 'P-256',
+    x: 'xuJ5LJvgY5ageBUbyJ5vVTQSyrAAx-xxxbmSk4NW2YA',
+    y: 'ZHujYr-HhNmVrtdf4icztCM2eMJ6XCq42MwwuhkD6dE'
+  };
+  const key = new Secp256r1();
+  key.importFromJWK(jwk);
+  expect(key.exportPublicKey()).toBe(pubkeyhex);
 });

@@ -76,4 +76,36 @@ export const Factory = {
     key.importFromManagedKey(mkey);
     return key;
   },
+
+  createFromJWK(jwk:JsonWebKey): CryptoKey {
+    let key:CryptoKey|null = null;
+
+    switch (jwk.kty) {
+      case 'OKP':
+        switch (jwk.crv) {
+          case 'Ed25519':
+            key = new Ed25519();
+            break;
+          case 'X25519':
+            key = new X25519();
+            break;
+        }
+        break;
+      case 'EC':
+        switch (jwk.crv) {
+          case 'P-256':
+            key = new Secp256r1();
+            break;
+          case 'secp256k1':
+            key = new Secp256k1();
+            break;
+        }
+        break;
+    }
+    if (!key) {
+      throw new Error("JWK type " + jwk.kty + "/" + jwk.crv + " not supported");
+    }
+    key.importFromJWK(jwk);
+    return key;
+  }
 };

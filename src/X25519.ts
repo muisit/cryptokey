@@ -37,8 +37,17 @@ export class X25519 extends CryptoKey {
     return {
       kty: "OKP",
       crv: "X25519",
+      kid: this.bytesToHex(this.publicKey()),
+      use: "enc",
+      key_ops: ["encrypt"],
       x: Buffer.from(this.publicKeyBytes!).toString("base64url"),
     };
+  }
+
+  importFromJWK(jwk:JsonWebKey) {
+    if (jwk.kty == 'OKP' && jwk.crv == 'X25519' && jwk.x) {
+      this.publicKeyBytes = this.base64UrlToBytes(jwk.x);
+    }
   }
 
   importFromDid(didKey: string): void {

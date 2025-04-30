@@ -41,6 +41,12 @@ export class Ed25519 extends CryptoKey {
     };
   }
 
+  importFromJWK(jwk:JsonWebKey) {
+    if (jwk.kty == 'OKP' && jwk.crv == 'Ed25519' && jwk.x) {
+      this.publicKeyBytes = this.base64UrlToBytes(jwk.x);
+    }
+  }
+
   importFromDid(didKey: string): void {
     if (!didKey.startsWith("did:key:z6Mk")) {
       throw new Error("Ed25519 did:key must start with did:key:z6Mk prefix");
