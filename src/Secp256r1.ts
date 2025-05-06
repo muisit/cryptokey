@@ -3,6 +3,7 @@ import * as crypto from "node:crypto";
 import { p256 } from "@noble/curves/p256";
 import { sha256 } from "@noble/hashes/sha256";
 import { JsonWebKey } from "did-jwt/lib/util";
+import { toString } from "uint8arrays";
 
 /* NIST secp256r1 aka p256 aka prime256v1
  * https://www.secg.org/sec2-v2.pdf
@@ -44,8 +45,8 @@ export class Secp256r1 extends CryptoKey {
       use: "sig",
       key_ops: ["verify"],
       alg: "ES256",
-      x: Buffer.from(uncompressed.slice(1, 33)).toString("base64url"),
-      y: Buffer.from(uncompressed.slice(33)).toString("base64url"),
+      x: toString(uncompressed.slice(1, 33), "base64url"),
+      y: toString(uncompressed.slice(33), "base64url"),
     };
   }
 

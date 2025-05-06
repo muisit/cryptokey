@@ -1,6 +1,7 @@
 import { CryptoKey } from "./CryptoKey";
 import { ed25519 } from "@noble/curves/ed25519";
 import * as crypto from "node:crypto";
+import { toString } from "uint8arrays";
 
 export class Ed25519 extends CryptoKey {
   constructor() {
@@ -25,7 +26,7 @@ export class Ed25519 extends CryptoKey {
       use: "sig",
       key_ops: ["verify"],
       alg: "EdDSA",
-      x: Buffer.from(this.publicKeyBytes!).toString("base64url"),
+      x: toString(this.publicKey(), "base64url"),
     };
   }
 
@@ -55,11 +56,7 @@ export class Ed25519 extends CryptoKey {
       );
     }
 
-    const isValid = ed25519.verify(
-      signature,
-      Buffer.from(data),
-      this.publicKey(),
-    );
+    const isValid = ed25519.verify(signature, data, this.publicKey());
     if (isValid) {
       return true;
     }

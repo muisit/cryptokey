@@ -151,3 +151,14 @@ test("DID:JWK", () => {
     "did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Inh1SjVMSnZnWTVhZ2VCVWJ5SjV2VlRRU3lyQUF4LXh4eGJtU2s0TlcyWUEiLCJ5IjoiWkh1allyLUhoTm1WcnRkZjRpY3p0Q00yZU1KNlhDcTQyTXd3dWhrRDZkRSJ9",
   );
 });
+
+test("resolve", async () => {
+  const key = await Factory.resolve(
+    "did:jwk:eyJhbGciOiJFUzI1NiIsInVzZSI6InNpZyIsImt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiSDRvdHEzTnFTWUdkamJiNjZiWHNxZXFzeG1rTlhZZE8wOGJ6MGRQbHpjSSIsInkiOiJoeHRwVU5CUEp1WUg5ZVdldDh4X01pV0V3MUpPV0RVZU5OR0JVQ1VjbmFRIn0",
+  );
+  expect(key).toBeDefined();
+  expect(key.keyType).toBe("Secp256r1");
+  expect(key.exportPublicKey()).toBe(
+    "021f8a2dab736a49819d8db6fae9b5eca9eaacc6690d5d874ed3c6f3d1d3e5cdc2",
+  );
+});

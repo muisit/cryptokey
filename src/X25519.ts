@@ -1,5 +1,6 @@
 import { CryptoKey } from "./CryptoKey";
 import { x25519 } from "@noble/curves/ed25519";
+import { toString } from "uint8arrays";
 
 /*
  * Curve25519 is an elliptic curve designed for use in the Diffie-Hellman key agreement scheme (ECDH).
@@ -33,7 +34,7 @@ export class X25519 extends CryptoKey {
       kid: this.bytesToHex(this.publicKey()),
       use: "enc",
       key_ops: ["encrypt"],
-      x: Buffer.from(this.publicKeyBytes!).toString("base64url"),
+      x: toString(this.publicKeyBytes!, "base64url"),
     };
   }
 
