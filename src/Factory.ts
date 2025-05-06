@@ -9,7 +9,7 @@ import { convertFromJWK } from "./convertors/convertJWK";
 import { convertFromDIDJWK, convertToDIDJWK } from "./convertors/convertDIDJWK";
 import { convertFromDIDWeb } from "./convertors/convertDIDWeb";
 
-export abstract class Factory {
+export class Factory {
   public static createFromType(
     keyType: string,
     privateKeyHex?: string,
