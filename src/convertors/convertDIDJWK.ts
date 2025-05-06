@@ -23,9 +23,7 @@ export function convertFromDIDJWKBytes(bytes: Uint8Array): CryptoKey {
 export function convertToDIDJWK(key: CryptoKey): string {
   const jwk = key.toJWK();
   // remove some elements we do not need in the output
-  if (jwk.alg) delete jwk.alg;
-  if (jwk.kid) delete jwk.kid;
-  if (jwk.use) delete jwk.use;
+  if (jwk.kid) delete jwk.kid; // the did is its own id
   if (jwk.key_ops) delete jwk.key_ops;
   if (jwk.d) delete jwk.d; // did:jwk is never ever a private key
   return (

@@ -118,6 +118,7 @@ test("create from managed key", () => {
 });
 
 test("DID:JWK", () => {
+  // this did:jwk does not contain alg and use claims
   const key1 = Factory.createFromDIDJWK(
     "did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwieCI6IlhER2JqQzFJQXlBbWMtMGFza3ZUUWx1UlRVSklHV2VzVE5rOHo4ZmV5emsifQ",
   );
@@ -125,8 +126,9 @@ test("DID:JWK", () => {
   expect(key1.exportPublicKey()).toBe(
     "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
   );
+  // we export with the alg and use claims included
   expect(Factory.toDIDJWK(key1)).toBe(
-    "did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwieCI6IlhER2JqQzFJQXlBbWMtMGFza3ZUUWx1UlRVSklHV2VzVE5rOHo4ZmV5emsifQ",
+    "did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwidXNlIjoic2lnIiwiYWxnIjoiRWREU0EiLCJ4IjoiWERHYmpDMUlBeUFtYy0wYXNrdlRRbHVSVFVKSUdXZXNUTms4ejhmZXl6ayJ9",
   );
 
   const key2 = Factory.createFromDIDJWK(
@@ -137,7 +139,7 @@ test("DID:JWK", () => {
     "034900ce66d2340ea0897c70d0a3fbb82c125ba163f9591ee090be097a11ad39f9",
   );
   expect(Factory.toDIDJWK(key2)).toBe(
-    "did:jwk:eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJTUURPWnRJMERxQ0pmSERRb191NExCSmJvV1A1V1I3Z2tMNEplaEd0T2ZrIiwieSI6IkxIWUNOQlJTVDJHR2twY25PRHpvNGJQaW15TUVJd2U5cEsxUzVTc2poN3MifQ",
+    "did:jwk:eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsInVzZSI6InNpZyIsImFsZyI6IkVTMjU2IiwieCI6IlNRRE9adEkwRHFDSmZIRFFvX3U0TEJKYm9XUDVXUjdna0w0SmVoR3RPZmsiLCJ5IjoiTEhZQ05CUlNUMkdHa3Bjbk9Eem80YlBpbXlNRUl3ZTlwSzFTNVNzamg3cyJ9",
   );
 
   const key3 = Factory.createFromDIDJWK(
@@ -148,7 +150,7 @@ test("DID:JWK", () => {
     "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
   );
   expect(Factory.toDIDJWK(key3)).toBe(
-    "did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Inh1SjVMSnZnWTVhZ2VCVWJ5SjV2VlRRU3lyQUF4LXh4eGJtU2s0TlcyWUEiLCJ5IjoiWkh1allyLUhoTm1WcnRkZjRpY3p0Q00yZU1KNlhDcTQyTXd3dWhrRDZkRSJ9",
+    "did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwidXNlIjoic2lnIiwiYWxnIjoiRVMyNTYiLCJ4IjoieHVKNUxKdmdZNWFnZUJVYnlKNXZWVFFTeXJBQXgteHh4Ym1TazROVzJZQSIsInkiOiJaSHVqWXItSGhObVZydGRmNGljenRDTTJlTUo2WENxNDJNd3d1aGtENmRFIn0",
   );
 });
 
