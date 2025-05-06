@@ -7,6 +7,7 @@ import {
 } from "did-resolver";
 import { convertToDIDKey, convertToMultibase } from "./convertDIDKey";
 import { convertToDIDJWK } from "./convertDIDJWK";
+import { Factory } from "../Factory";
 
 // https://www.w3.org/TR/did-1.0/
 export function convertToDidDocument(
@@ -74,4 +75,20 @@ export function convertToDidDocument(
   }
 
   return result;
+}
+
+export function convertFromDIDDocument(doc:DIDDocument)
+{
+  if (doc["verificationMethod"]) {
+    // just pick the first we understand
+    for(const methods of doc["verificationMethod"]) {
+      if (methods.publicKeyJwk) {
+        return Factory.createFromJWK(methods.publicKeyJwk);
+      }
+      else if(methods.publicKeyMultibase) {
+        return Factory.createFromDIDKey('did:key:' + methods.publicKeyMultibase);
+      }
+    }
+  }
+  throw new Error("No key found in DID document");
 }

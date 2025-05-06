@@ -7,6 +7,7 @@ import { ManagedKeyInfo } from "@veramo/core-types";
 import { convertFromDIDKey, convertToDIDKey } from "./convertors/convertDIDKey";
 import { convertFromJWK } from "./convertors/convertJWK";
 import { convertFromDIDJWK, convertToDIDJWK } from "./convertors/convertDIDJWK";
+import { convertFromDIDWeb } from "./convertors/convertDIDWeb";
 
 export abstract class Factory {
   public static createFromType(
@@ -35,6 +36,23 @@ export abstract class Factory {
       key.initialisePrivateKey(key.hexToBytes(privateKeyHex));
     }
     return key;
+  }
+
+  public static async resolve(keyId:string) {
+    if (keyId.startsWith('did:key:')) {
+      return Factory.createFromDIDKey(keyId);
+    }
+    else if(keyId.startsWith('did:jwk:')) {
+      return Factory.createFromDIDJWK(keyId);
+    }
+    else if(keyId.startsWith('did:web:')) {
+      return await Factory.createFromDIDWeb(keyId);
+    }
+    throw new Error("Cannot resolve " + keyId);
+  }
+
+  public static async createFromDIDWeb(didUrl:string): Promise<CryptoKey> {
+    return await convertFromDIDWeb(didUrl);
   }
 
   public static createFromDIDKey(didKey: string): CryptoKey {
