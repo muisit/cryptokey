@@ -4,9 +4,15 @@ import { X25519 } from "./X25519";
 import { Secp256r1 } from "./Secp256r1";
 import { Secp256k1 } from "./Secp256k1";
 import { ManagedKeyInfo } from "@veramo/core-types";
+import { convertFromDIDKey, convertToDIDKey } from "./convertors/convertDIDKey";
+import { convertFromJWK } from "./convertors/convertJWK";
+import { convertFromDIDJWK, convertToDIDJWK } from "./convertors/convertDIDJWK";
 
-export const Factory = {
-  createFromType: (keyType: string, privateKeyHex?: string): CryptoKey => {
+export abstract class Factory {
+  public static createFromType(
+    keyType: string,
+    privateKeyHex?: string,
+  ): CryptoKey {
     let key: CryptoKey;
     switch (keyType.toLocaleLowerCase()) {
       case "ed25519":
@@ -29,32 +35,23 @@ export const Factory = {
       key.initialisePrivateKey(key.hexToBytes(privateKeyHex));
     }
     return key;
-  },
+  }
 
-  createFromDidKey(didKey: string) {
-    let key: CryptoKey;
+  public static createFromDIDKey(didKey: string): CryptoKey {
+    return convertFromDIDKey(didKey)!;
+  }
+  public static toDIDKey(key: CryptoKey): string {
+    return convertToDIDKey(key);
+  }
 
-    if (didKey.startsWith("did:key:z6Mk")) {
-      key = new Ed25519();
-    } else if (didKey.startsWith("did:key:z6LS")) {
-      key = new X25519();
-    } else if (
-      didKey.startsWith("did:key:zQ3s") ||
-      didKey.startsWith("did:key:z7r8")
-    ) {
-      key = new Secp256k1();
-    } else if (didKey.startsWith("did:key:zDn")) {
-      key = new Secp256r1();
-    } else {
-      throw new Error(
-        "did key " + didKey.substring(0, 8) + "... not supported.",
-      );
-    }
-    key.importFromDid(didKey);
-    return key;
-  },
+  public static createFromDIDJWK(didKey: string): CryptoKey {
+    return convertFromDIDJWK(didKey)!;
+  }
+  public static toDIDJWK(key: CryptoKey): string {
+    return convertToDIDJWK(key);
+  }
 
-  createFromManagedKey(mkey: ManagedKeyInfo): CryptoKey {
+  public static createFromManagedKey(mkey: ManagedKeyInfo): CryptoKey {
     let key: CryptoKey;
     switch ((mkey.type as string).toLowerCase()) {
       case "ed25519":
@@ -75,37 +72,13 @@ export const Factory = {
 
     key.importFromManagedKey(mkey);
     return key;
-  },
+  }
 
-  createFromJWK(jwk: JsonWebKey): CryptoKey {
-    let key: CryptoKey | null = null;
+  public static createFromJWK(jwk: JsonWebKey): CryptoKey {
+    return convertFromJWK(jwk);
+  }
 
-    switch (jwk.kty) {
-      case "OKP":
-        switch (jwk.crv) {
-          case "Ed25519":
-            key = new Ed25519();
-            break;
-          case "X25519":
-            key = new X25519();
-            break;
-        }
-        break;
-      case "EC":
-        switch (jwk.crv) {
-          case "P-256":
-            key = new Secp256r1();
-            break;
-          case "secp256k1":
-            key = new Secp256k1();
-            break;
-        }
-        break;
-    }
-    if (!key) {
-      throw new Error("JWK type " + jwk.kty + "/" + jwk.crv + " not supported");
-    }
-    key.importFromJWK(jwk);
-    return key;
-  },
-};
+  public static toJWK(key: CryptoKey) {
+    return key.toJWK();
+  }
+}

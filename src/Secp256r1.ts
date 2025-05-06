@@ -1,10 +1,4 @@
-import {
-  contextFromKeyFormat,
-  CryptoKey,
-  SupportedVerificationMethods,
-} from "./CryptoKey";
-import { multibaseToBytes } from "@veramo/utils";
-import { VerificationMethod } from "did-resolver";
+import { CryptoKey } from "./CryptoKey";
 import * as crypto from "node:crypto";
 import { p256 } from "@noble/curves/p256";
 import { sha256 } from "@noble/hashes/sha256";
@@ -18,7 +12,6 @@ export class Secp256r1 extends CryptoKey {
   constructor() {
     super();
     this.keyType = "Secp256r1";
-    this.codecCode = 0x1200;
   }
 
   createPrivateKey() {
@@ -65,84 +58,6 @@ export class Secp256r1 extends CryptoKey {
       this.publicKeyBytes =
         p256.ProjectivePoint.fromHex(uncompressed).toRawBytes(true);
     }
-  }
-
-  importFromDid(didKey: string): void {
-    if (!didKey.startsWith("did:key:zDn")) {
-      throw new Error("Secp256r1 did:key must start with did:key:zDn prefix");
-    }
-    const keyMultibase = didKey.substring(8);
-    const result = multibaseToBytes(keyMultibase);
-    const resultKeyType: string | undefined = result.keyType?.toString();
-    if (
-      !resultKeyType ||
-      (resultKeyType !== "P-256" && resultKeyType !== "Secp256r1")
-    ) {
-      throw new Error(
-        `invalidDid: the key type cannot be deduced for ${didKey}`,
-      );
-    }
-    this.publicKeyBytes = result.keyBytes;
-  }
-
-  didDocument(method?: SupportedVerificationMethods) {
-    const publicKeyFormat: SupportedVerificationMethods =
-      method || SupportedVerificationMethods.JsonWebKey2020;
-
-    const keyMultibase = this.toDIDKey();
-    const did = "did:key:" + keyMultibase;
-    const verificationMethod: VerificationMethod = {
-      id: `${did}#${keyMultibase}`,
-      type: publicKeyFormat.toString(),
-      controller: did,
-    };
-
-    switch (publicKeyFormat) {
-      case SupportedVerificationMethods.JsonWebKey2020:
-      case SupportedVerificationMethods.EcdsaSecp256r1VerificationKey2019:
-        verificationMethod.publicKeyJwk = this.toJWK() as JsonWebKey;
-        break;
-      case SupportedVerificationMethods.Multikey:
-      case SupportedVerificationMethods.EcdsaSecp256k1VerificationKey2019:
-      case SupportedVerificationMethods.EcdsaSecp256k1VerificationKey2020:
-        verificationMethod.publicKeyMultibase = keyMultibase;
-        break;
-      default:
-        throw new Error(
-          `invalidPublicKeyType: Unsupported public key format ${publicKeyFormat}`,
-        );
-    }
-
-    let ldContext = {};
-    const acceptedFormat: string = "application/did+ld+json";
-    if (acceptedFormat === "application/did+json") {
-      ldContext = {};
-    } else if (acceptedFormat === "application/did+ld+json") {
-      ldContext = {
-        "@context": [
-          "https://www.w3.org/ns/did/v1",
-          contextFromKeyFormat[publicKeyFormat],
-        ],
-      };
-    } else {
-      throw new Error(
-        `unsupportedFormat: The DID resolver does not support the requested 'accept' format: ${acceptedFormat}`,
-      );
-    }
-
-    return {
-      didResolutionMetadata: {},
-      didDocumentMetadata: { contentType: "application/did+ld+json" },
-      didDocument: {
-        ...ldContext,
-        id: did,
-        verificationMethod: [verificationMethod],
-        authentication: [verificationMethod.id],
-        assertionMethod: [verificationMethod.id],
-        capabilityDelegation: [verificationMethod.id],
-        capabilityInvocation: [verificationMethod.id],
-      },
-    };
   }
 
   algorithms() {

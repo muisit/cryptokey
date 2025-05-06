@@ -2,28 +2,37 @@ import { test, expect } from "vitest";
 import { Factory } from "../src/Factory";
 
 test("create from did", () => {
-  let key1 = Factory.createFromDidKey(
+  let key1 = Factory.createFromDIDKey(
     "did:key:z6Mkkf9RiKeaAFaQzQGT2zfqqwCYYbPTNhQvyGXjKJ84kW88",
   );
   expect(key1.keyType).toBe("Ed25519");
   expect(key1.exportPublicKey()).toBe(
     "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
   );
+  expect(Factory.toDIDKey(key1)).toBe(
+    "did:key:z6Mkkf9RiKeaAFaQzQGT2zfqqwCYYbPTNhQvyGXjKJ84kW88",
+  );
 
-  let key2 = Factory.createFromDidKey(
+  let key2 = Factory.createFromDIDKey(
     "did:key:zQ3shjZ5btPjB5qhUqJyH68XczxL11JqCTng4XBwhdy9nVYic",
   );
   expect(key2.keyType).toBe("Secp256k1");
   expect(key2.exportPublicKey()).toBe(
     "034900ce66d2340ea0897c70d0a3fbb82c125ba163f9591ee090be097a11ad39f9",
   );
+  expect(Factory.toDIDKey(key2)).toBe(
+    "did:key:zQ3shjZ5btPjB5qhUqJyH68XczxL11JqCTng4XBwhdy9nVYic",
+  );
 
-  let key3 = Factory.createFromDidKey(
+  let key3 = Factory.createFromDIDKey(
     "did:key:zDnaew3eSC3JmvrFcgwgoGULgcm3iQR9han5k2d4P87vsDkdm",
   );
   expect(key3.keyType).toBe("Secp256r1");
   expect(key3.exportPublicKey()).toBe(
     "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
+  );
+  expect(Factory.toDIDKey(key3)).toBe(
+    "did:key:zDnaew3eSC3JmvrFcgwgoGULgcm3iQR9han5k2d4P87vsDkdm",
   );
 });
 
@@ -37,6 +46,9 @@ test("create from jwk", () => {
   expect(key1.exportPublicKey()).toBe(
     "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
   );
+  expect(Factory.toJWK(key1).x).toBe(
+    "XDGbjC1IAyAmc-0askvTQluRTUJIGWesTNk8z8feyzk",
+  );
 
   let key2 = Factory.createFromJWK({
     kty: "EC",
@@ -48,6 +60,9 @@ test("create from jwk", () => {
   expect(key2.exportPublicKey()).toBe(
     "034900ce66d2340ea0897c70d0a3fbb82c125ba163f9591ee090be097a11ad39f9",
   );
+  expect(Factory.toJWK(key2).x).toBe(
+    "SQDOZtI0DqCJfHDQo_u4LBJboWP5WR7gkL4JehGtOfk",
+  );
 
   let key3 = Factory.createFromJWK({
     kty: "EC",
@@ -58,6 +73,9 @@ test("create from jwk", () => {
   expect(key3.keyType).toBe("Secp256r1");
   expect(key3.exportPublicKey()).toBe(
     "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
+  );
+  expect(Factory.toJWK(key3).x).toBe(
+    "xuJ5LJvgY5ageBUbyJ5vVTQSyrAAx-xxxbmSk4NW2YA",
   );
 });
 
@@ -96,5 +114,40 @@ test("create from managed key", () => {
   expect(key3.keyType).toBe("Secp256r1");
   expect(key3.exportPublicKey()).toBe(
     "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
+  );
+});
+
+test("DID:JWK", () => {
+  const key1 = Factory.createFromDIDJWK(
+    "did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwieCI6IlhER2JqQzFJQXlBbWMtMGFza3ZUUWx1UlRVSklHV2VzVE5rOHo4ZmV5emsifQ",
+  );
+  expect(key1.keyType).toBe("Ed25519");
+  expect(key1.exportPublicKey()).toBe(
+    "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
+  );
+  expect(Factory.toDIDJWK(key1)).toBe(
+    "did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwieCI6IlhER2JqQzFJQXlBbWMtMGFza3ZUUWx1UlRVSklHV2VzVE5rOHo4ZmV5emsifQ",
+  );
+
+  const key2 = Factory.createFromDIDJWK(
+    "did:jwk:eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJTUURPWnRJMERxQ0pmSERRb191NExCSmJvV1A1V1I3Z2tMNEplaEd0T2ZrIiwieSI6IkxIWUNOQlJTVDJHR2twY25PRHpvNGJQaW15TUVJd2U5cEsxUzVTc2poN3MifQ",
+  );
+  expect(key2.keyType).toBe("Secp256k1");
+  expect(key2.exportPublicKey()).toBe(
+    "034900ce66d2340ea0897c70d0a3fbb82c125ba163f9591ee090be097a11ad39f9",
+  );
+  expect(Factory.toDIDJWK(key2)).toBe(
+    "did:jwk:eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJTUURPWnRJMERxQ0pmSERRb191NExCSmJvV1A1V1I3Z2tMNEplaEd0T2ZrIiwieSI6IkxIWUNOQlJTVDJHR2twY25PRHpvNGJQaW15TUVJd2U5cEsxUzVTc2poN3MifQ",
+  );
+
+  const key3 = Factory.createFromDIDJWK(
+    "did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Inh1SjVMSnZnWTVhZ2VCVWJ5SjV2VlRRU3lyQUF4LXh4eGJtU2s0TlcyWUEiLCJ5IjoiWkh1allyLUhoTm1WcnRkZjRpY3p0Q00yZU1KNlhDcTQyTXd3dWhrRDZkRSJ9",
+  );
+  expect(key3.keyType).toBe("Secp256r1");
+  expect(key3.exportPublicKey()).toBe(
+    "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
+  );
+  expect(Factory.toDIDJWK(key3)).toBe(
+    "did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Inh1SjVMSnZnWTVhZ2VCVWJ5SjV2VlRRU3lyQUF4LXh4eGJtU2s0TlcyWUEiLCJ5IjoiWkh1allyLUhoTm1WcnRkZjRpY3p0Q00yZU1KNlhDcTQyTXd3dWhrRDZkRSJ9",
   );
 });

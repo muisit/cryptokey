@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { TKeyType } from "@veramo/core-types";
 import { Ed25519 } from "../src/Ed25519";
 import * as crypto from "node:crypto";
+import { Factory } from "../src/Factory";
 
 const privkeyhex =
   "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8";
@@ -35,8 +36,9 @@ test("import private key", () => {
 });
 
 test("import from DID", () => {
-  const key = new Ed25519();
-  key.importFromDid("did:key:z6Mkkf9RiKeaAFaQzQGT2zfqqwCYYbPTNhQvyGXjKJ84kW88");
+  const key = Factory.createFromDIDKey(
+    "did:key:z6Mkkf9RiKeaAFaQzQGT2zfqqwCYYbPTNhQvyGXjKJ84kW88",
+  );
   expect(key.hasPrivateKey()).toBeFalsy();
   expect(key.privateKeyBytes === null).toBeTruthy();
   expect(key.hasPublicKey()).toBeTruthy();
@@ -49,8 +51,8 @@ test("export to DID", () => {
   const key = new Ed25519();
   key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
-  expect(key.toDIDKey()).toBe(
-    "z6Mkkf9RiKeaAFaQzQGT2zfqqwCYYbPTNhQvyGXjKJ84kW88",
+  expect(Factory.toDIDKey(key)).toBe(
+    "did:key:z6Mkkf9RiKeaAFaQzQGT2zfqqwCYYbPTNhQvyGXjKJ84kW88",
   );
 });
 

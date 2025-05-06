@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { TKeyType } from "@veramo/core-types";
 import { Secp256k1 } from "../src/Secp256k1";
-import * as crypto from "node:crypto";
+import { Factory } from "../src/Factory";
 
 const privkeyhex =
   "e241c43ce7bbee7181be7788c46d9150b4dd1a4dd1f3ff66fe1b802b5e32ecb1";
@@ -35,8 +35,7 @@ test("import private key", () => {
 });
 
 test("import from DID", () => {
-  const key = new Secp256k1();
-  key.importFromDid(
+  const key = Factory.createFromDIDKey(
     "did:key:zQ3shjZ5btPjB5qhUqJyH68XczxL11JqCTng4XBwhdy9nVYic",
   );
   expect(key.hasPrivateKey()).toBeFalsy();
@@ -51,8 +50,8 @@ test("export to DID", () => {
   const key = new Secp256k1();
   key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
-  expect(key.toDIDKey()).toBe(
-    "zQ3shjZ5btPjB5qhUqJyH68XczxL11JqCTng4XBwhdy9nVYic",
+  expect(Factory.toDIDKey(key)).toBe(
+    "did:key:zQ3shjZ5btPjB5qhUqJyH68XczxL11JqCTng4XBwhdy9nVYic",
   );
 });
 
