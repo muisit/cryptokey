@@ -38,20 +38,18 @@ export abstract class Factory {
     return key;
   }
 
-  public static async resolve(keyId:string) {
-    if (keyId.startsWith('did:key:')) {
+  public static async resolve(keyId: string) {
+    if (keyId.startsWith("did:key:")) {
       return Factory.createFromDIDKey(keyId);
-    }
-    else if(keyId.startsWith('did:jwk:')) {
+    } else if (keyId.startsWith("did:jwk:")) {
       return Factory.createFromDIDJWK(keyId);
-    }
-    else if(keyId.startsWith('did:web:')) {
+    } else if (keyId.startsWith("did:web:")) {
       return await Factory.createFromDIDWeb(keyId);
     }
     throw new Error("Cannot resolve " + keyId);
   }
 
-  public static async createFromDIDWeb(didUrl:string): Promise<CryptoKey> {
+  public static async createFromDIDWeb(didUrl: string): Promise<CryptoKey> {
     return await convertFromDIDWeb(didUrl);
   }
 

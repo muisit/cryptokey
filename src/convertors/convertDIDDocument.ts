@@ -77,16 +77,16 @@ export function convertToDidDocument(
   return result;
 }
 
-export function convertFromDIDDocument(doc:DIDDocument)
-{
+export function convertFromDIDDocument(doc: DIDDocument) {
   if (doc["verificationMethod"]) {
     // just pick the first we understand
-    for(const methods of doc["verificationMethod"]) {
+    for (const methods of doc["verificationMethod"]) {
       if (methods.publicKeyJwk) {
         return Factory.createFromJWK(methods.publicKeyJwk);
-      }
-      else if(methods.publicKeyMultibase) {
-        return Factory.createFromDIDKey('did:key:' + methods.publicKeyMultibase);
+      } else if (methods.publicKeyMultibase) {
+        return Factory.createFromDIDKey(
+          "did:key:" + methods.publicKeyMultibase,
+        );
       }
     }
   }
