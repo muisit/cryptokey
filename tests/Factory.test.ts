@@ -164,3 +164,14 @@ test("resolve", async () => {
     "021f8a2dab736a49819d8db6fae9b5eca9eaacc6690d5d874ed3c6f3d1d3e5cdc2",
   );
 });
+
+test("resolve did:key with jwk", async() => {
+  const key = await Factory.resolve(
+    "did:key:z2SpZdbv3LZ9yeUBaekRedETjR3HegR2VYYuS6JvVSXDbCB29vfrer3EwetJVYwJ7qBnMYfrepE16mrjBcug9AoQcf3vphsmF2qhTWRf3rFH5fJ7onG76cAaRzH8YSpUMrFJqLP1RUxudYfF5KENrF17ermCfGfdBYjtYsGTuoeYnGBRBJiJKtAx3uK5ADhCteUhaCW3EwW4ezqx98hmjxxPbTJ"
+  );
+  expect(key).toBeDefined();
+  expect(key.keyType).toBe("Secp256k1");
+  expect(key.exportPublicKey()).toBe(
+    "034900ce66d2340ea0897c70d0a3fbb82c125ba163f9591ee090be097a11ad39f9",
+  );
+})
