@@ -8,6 +8,11 @@ import { convertFromDIDKey, convertToDIDKey } from "./convertors/convertDIDKey";
 import { convertFromJWK } from "./convertors/convertJWK";
 import { convertFromDIDJWK, convertToDIDJWK } from "./convertors/convertDIDJWK";
 import { convertFromDIDWeb } from "./convertors/convertDIDWeb";
+import {
+  convertFromDIDDocument,
+  convertToDIDDocument,
+} from "./convertors/convertDIDDocument";
+import { VerificationMethods } from "./types";
 
 export class Factory {
   public static createFromType(
@@ -92,6 +97,23 @@ export class Factory {
 
   public static createFromJWK(jwk: JsonWebKey): CryptoKey {
     return convertFromJWK(jwk);
+  }
+
+  public static createFromDIDDocument(doc: any): CryptoKey {
+    return convertFromDIDDocument(doc);
+  }
+
+  public static toDIDDocument(
+    key: CryptoKey,
+    verificationMethodType: string = "JsonWebKey",
+    did?: string,
+  ) {
+    return convertToDIDDocument(
+      key,
+      VerificationMethods.JsonWebKey,
+      verificationMethodType,
+      did,
+    );
   }
 
   public static toJWK(key: CryptoKey) {

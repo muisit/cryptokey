@@ -10,7 +10,7 @@ import { convertToDIDJWK } from "./convertDIDJWK";
 import { Factory } from "../Factory";
 
 // https://www.w3.org/TR/did-1.0/
-export function convertToDidDocument(
+export function convertToDIDDocument(
   key: CryptoKey,
   publicKeyFormat: VerificationMethods = VerificationMethods.JsonWebKey,
   verificationMethodType?: string,
