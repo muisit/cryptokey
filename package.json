@@ -1,6 +1,6 @@
 {
   "name": "@muisit/cryptokey",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Cryptography for assymmetric keys in Node",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
