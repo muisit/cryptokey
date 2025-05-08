@@ -175,3 +175,23 @@ test("resolve did:key with jwk", async() => {
     "034900ce66d2340ea0897c70d0a3fbb82c125ba163f9591ee090be097a11ad39f9",
   );
 })
+
+test("instantiate ed25519 with 64bit private key", () => {
+  const privkeyhex = "b5f28b7cd658b8f050e7832024f0d15bd8a6868e3bb6cc06e1405e9b11308b4963b78f6b857df765a63e55ebbfb546e8d043ca6760b26f5c056883bd845d34c3";
+  const key = Factory.createFromType('Ed25519', privkeyhex);
+  expect(key).toBeDefined();
+  expect(key.keyType).toBe("Ed25519");
+  expect(key.exportPublicKey()).toBe(
+    "63b78f6b857df765a63e55ebbfb546e8d043ca6760b26f5c056883bd845d34c3",
+  );
+});
+
+test("instantiate ed25519 with 64bit private key (2)", () => {
+  const privkeyhex = "6d8be598361a5ccae3400ab3ae172a105bc9ee0a3bad33e85e0257a1f5755b2778faa7e63fee80449bcb89e706c544f5f43849ddb2ffdc41f80316ae3ff2dc96";
+  const key = Factory.createFromType('Ed25519', privkeyhex);
+  expect(key).toBeDefined();
+  expect(key.keyType).toBe("Ed25519");
+  expect(key.exportPublicKey()).toBe(
+    "78faa7e63fee80449bcb89e706c544f5f43849ddb2ffdc41f80316ae3ff2dc96",
+  );
+})

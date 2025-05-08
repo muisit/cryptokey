@@ -15,6 +15,10 @@ export class Ed25519 extends CryptoKey {
 
   initialisePrivateKey(keyData?: Uint8Array): void {
     this.privateKeyBytes = keyData ?? ed25519.utils.randomPrivateKey();
+    if (this.privateKeyBytes!.length > 32) {
+      // precaution in case we have a priv+pub key concatenation
+      this.privateKeyBytes = this.privateKeyBytes!.slice(0, 32);
+    }
     this.publicKeyBytes = ed25519.getPublicKey(this.privateKeyBytes!);
   }
 

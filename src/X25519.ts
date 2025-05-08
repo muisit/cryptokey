@@ -24,6 +24,10 @@ export class X25519 extends CryptoKey {
 
   initialisePrivateKey(key: any): void {
     this.privateKeyBytes = key;
+    if (this.privateKeyBytes!.length > 32) {
+      // precaution in case we have a priv+pub key concatenation
+      this.privateKeyBytes = this.privateKeyBytes!.slice(0, 32);
+    }
     this.publicKeyBytes = x25519.getPublicKey(this.privateKeyBytes!);
   }
 
