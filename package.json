@@ -41,6 +41,7 @@
     "@veramo/utils": "6.0.0",
     "did-jwt": "^8.0.11",
     "did-resolver": "^4.1.0",
+    "jose": "^6.0.11",
     "multiformats": "^13.3.2"
   },
   "files": [

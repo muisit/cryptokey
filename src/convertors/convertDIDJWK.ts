@@ -2,26 +2,26 @@ import { fromString, toString } from "uint8arrays";
 import { CryptoKey } from "../CryptoKey";
 import { Factory } from "../Factory";
 
-export function convertFromDIDJWK(didUrl: string): CryptoKey {
+export async function convertFromDIDJWK(didUrl: string): Promise<CryptoKey> {
   if (!didUrl.startsWith("did:jwk:")) {
     throw new Error("Invalid did:jwk");
   }
   const encoded = didUrl.slice(8);
-  return convertFromDIDJWKBytes(fromString(encoded, "base64url"));
+  return await convertFromDIDJWKBytes(fromString(encoded, "base64url"));
 }
 
-export function convertFromDIDJWKBytes(bytes: Uint8Array): CryptoKey {
+export async function convertFromDIDJWKBytes(bytes: Uint8Array): Promise<CryptoKey> {
   const jsonString = toString(bytes, "utf-8");
   const jwk = JSON.parse(jsonString);
   if (jwk && Object.keys(jwk) && jwk.kty && jwk.crv) {
-    return Factory.createFromJWK(jwk);
+    return await Factory.createFromJWK(jwk);
   }
   throw new Error("Unable to decode jwk");
 }
 
 // https://github.com/quartzjer/did-jwk/blob/main/spec.md
-export function convertToDIDJWK(key: CryptoKey): string {
-  const jwk = key.toJWK();
+export async function convertToDIDJWK(key: CryptoKey): Promise<string> {
+  const jwk = await key.toJWK();
   // remove some elements we do not need in the output
   if (jwk.kid) delete jwk.kid; // the did is its own id
   if (jwk.key_ops) delete jwk.key_ops;

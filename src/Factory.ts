@@ -3,6 +3,7 @@ import { Ed25519 } from "./Ed25519";
 import { X25519 } from "./X25519";
 import { Secp256r1 } from "./Secp256r1";
 import { Secp256k1 } from "./Secp256k1";
+import { RSA } from "./RSA";
 import { ManagedKeyInfo } from "@veramo/core-types";
 import { convertFromDIDKey, convertToDIDKey } from "./convertors/convertDIDKey";
 import { convertFromJWK } from "./convertors/convertJWK";
@@ -15,10 +16,10 @@ import {
 import { VerificationMethods } from "./types";
 
 export class Factory {
-  public static createFromType(
+  public static async createFromType(
     keyType: string,
     privateKeyHex?: string,
-  ): CryptoKey {
+  ): Promise<CryptoKey> {
     let key: CryptoKey;
     switch (keyType.toLocaleLowerCase()) {
       case "ed25519":
@@ -33,12 +34,15 @@ export class Factory {
       case "secp256k1":
         key = new Secp256k1();
         break;
+      case "rsa":
+        key = new RSA();
+        break;
       default:
         throw new Error("key type " + keyType + " notsupported");
     }
 
     if (privateKeyHex) {
-      key.initialisePrivateKey(key.hexToBytes(privateKeyHex));
+      await key.initialisePrivateKey(key.hexToBytes(privateKeyHex));
     }
     return key;
   }
@@ -58,21 +62,21 @@ export class Factory {
     return await convertFromDIDWeb(didUrl);
   }
 
-  public static createFromDIDKey(didKey: string): CryptoKey {
-    return convertFromDIDKey(didKey)!;
+  public static async createFromDIDKey(didKey: string): Promise<CryptoKey> {
+    return await convertFromDIDKey(didKey)!;
   }
-  public static toDIDKey(key: CryptoKey): string {
-    return convertToDIDKey(key);
-  }
-
-  public static createFromDIDJWK(didKey: string): CryptoKey {
-    return convertFromDIDJWK(didKey)!;
-  }
-  public static toDIDJWK(key: CryptoKey): string {
-    return convertToDIDJWK(key);
+  public static async toDIDKey(key: CryptoKey): Promise<string> {
+    return await convertToDIDKey(key);
   }
 
-  public static createFromManagedKey(mkey: ManagedKeyInfo): CryptoKey {
+  public static async createFromDIDJWK(didKey: string): Promise<CryptoKey> {
+    return await convertFromDIDJWK(didKey)!;
+  }
+  public static async toDIDJWK(key: CryptoKey): Promise<string> {
+    return await convertToDIDJWK(key);
+  }
+
+  public static async createFromManagedKey(mkey: ManagedKeyInfo): Promise<CryptoKey> {
     let key: CryptoKey;
     switch ((mkey.type as string).toLowerCase()) {
       case "ed25519":
@@ -87,28 +91,31 @@ export class Factory {
       case "secp256k1":
         key = new Secp256k1();
         break;
+      case "rsa":
+        key = new RSA();
+        break;
       default:
         throw new Error("key type " + mkey.type + " not supported");
     }
 
-    key.importFromManagedKey(mkey);
+    await key.importFromManagedKey(mkey);
     return key;
   }
 
-  public static createFromJWK(jwk: JsonWebKey): CryptoKey {
-    return convertFromJWK(jwk);
+  public static async createFromJWK(jwk: JsonWebKey): Promise<CryptoKey> {
+    return await convertFromJWK(jwk);
   }
 
-  public static createFromDIDDocument(doc: any): CryptoKey {
-    return convertFromDIDDocument(doc);
+  public static async createFromDIDDocument(doc: any): Promise<CryptoKey> {
+    return await convertFromDIDDocument(doc);
   }
 
-  public static toDIDDocument(
+  public static async toDIDDocument(
     key: CryptoKey,
     verificationMethodType: string = "JsonWebKey",
     did?: string,
   ) {
-    return convertToDIDDocument(
+    return await convertToDIDDocument(
       key,
       VerificationMethods.JsonWebKey,
       verificationMethodType,
@@ -116,7 +123,7 @@ export class Factory {
     );
   }
 
-  public static toJWK(key: CryptoKey) {
-    return key.toJWK();
+  public static async toJWK(key: CryptoKey) {
+    return await key.toJWK();
   }
 }

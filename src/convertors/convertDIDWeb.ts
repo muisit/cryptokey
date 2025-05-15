@@ -12,5 +12,5 @@ export async function convertFromDIDWeb(didUrl: string) {
 
   // fetch the document
   const response = await fetch(url).then((r) => r.json());
-  return convertFromDIDDocument(response);
+  return await convertFromDIDDocument(response);
 }

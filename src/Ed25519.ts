@@ -9,11 +9,11 @@ export class Ed25519 extends CryptoKey {
     this.keyType = "Ed25519";
   }
 
-  createPrivateKey() {
-    this.initialisePrivateKey(ed25519.utils.randomPrivateKey());
+  async createPrivateKey() {
+    await this.initialisePrivateKey(ed25519.utils.randomPrivateKey());
   }
 
-  initialisePrivateKey(keyData?: Uint8Array): void {
+  async initialisePrivateKey(keyData?: Uint8Array) {
     this.privateKeyBytes = keyData ?? ed25519.utils.randomPrivateKey();
     if (this.privateKeyBytes!.length > 32) {
       // precaution in case we have a priv+pub key concatenation
@@ -22,19 +22,19 @@ export class Ed25519 extends CryptoKey {
     this.publicKeyBytes = ed25519.getPublicKey(this.privateKeyBytes!);
   }
 
-  toJWK(): crypto.JsonWebKey {
+  async toJWK(alg?:string): Promise<crypto.JsonWebKey> {
     return {
       kty: "OKP",
       crv: "Ed25519",
       kid: this.bytesToHex(this.publicKey()),
       use: "sig",
       key_ops: ["verify"],
-      alg: "EdDSA",
+      alg: alg || "EdDSA",
       x: toString(this.publicKey(), "base64url"),
     };
   }
 
-  importFromJWK(jwk: JsonWebKey) {
+  async importFromJWK(jwk: JsonWebKey) {
     if (jwk.kty == "OKP" && jwk.crv == "Ed25519" && jwk.x) {
       this.publicKeyBytes = this.base64UrlToBytes(jwk.x);
     }

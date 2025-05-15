@@ -9,9 +9,9 @@ const privkeyhex =
 const pubkeyhex =
   "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980";
 
-test("Initialise key", () => {
+test("Initialise key", async () => {
   const key = new Secp256r1();
-  key.createPrivateKey();
+  await key.createPrivateKey();
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.privateKeyBytes === null).toBeFalsy();
   expect(key.privateKeyBytes!.length).toBe(32);
@@ -22,9 +22,9 @@ test("Initialise key", () => {
   expect(key.algorithms()).toContain("ES256");
 });
 
-test("import private key", () => {
+test("import private key", async () => {
   const key = new Secp256r1();
-  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.privateKeyBytes === null).toBeFalsy();
   expect(key.privateKeyBytes!.length).toBe(32);
@@ -35,8 +35,8 @@ test("import private key", () => {
   expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
-test("import from DID", () => {
-  const key = Factory.createFromDIDKey(
+test("import from DID", async () => {
+  const key = await Factory.createFromDIDKey(
     "did:key:zDnaew3eSC3JmvrFcgwgoGULgcm3iQR9han5k2d4P87vsDkdm",
   );
   expect(key.hasPrivateKey()).toBeFalsy();
@@ -47,25 +47,25 @@ test("import from DID", () => {
   expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
-test("export to DID", () => {
+test("export to DID", async () => {
   const key = new Secp256r1();
-  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
-  expect(Factory.toDIDKey(key)).toBe(
+  expect(await Factory.toDIDKey(key)).toBe(
     "did:key:zDnaew3eSC3JmvrFcgwgoGULgcm3iQR9han5k2d4P87vsDkdm",
   );
 });
 
-test("import from managed key", () => {
+test("import from managed key", async () => {
   const key = new Secp256r1();
   const mkey = {
     kid: pubkeyhex,
-    type: "Ed25519" as TKeyType,
+    type: "Secp256r1" as TKeyType,
     kms: "default",
     publicKeyHex: pubkeyhex,
     privateKeyHex: privkeyhex,
   };
-  key.importFromManagedKey(mkey);
+  await key.importFromManagedKey(mkey);
 
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.privateKeyBytes === null).toBeFalsy();
@@ -77,7 +77,7 @@ test("import from managed key", () => {
   expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
 
-test("import from managed public key", () => {
+test("import from managed public key", async () => {
   const key = new Secp256r1();
   const mkey = {
     kid: pubkeyhex,
@@ -85,7 +85,7 @@ test("import from managed public key", () => {
     kms: "default",
     publicKeyHex: pubkeyhex,
   };
-  key.importFromManagedKey(mkey);
+  await key.importFromManagedKey(mkey);
 
   expect(key.hasPrivateKey()).toBeFalsy();
   expect(key.privateKeyBytes === null).toBeTruthy();
@@ -97,7 +97,7 @@ test("import from managed public key", () => {
 
 test("signature", async () => {
   const key = new Secp256r1();
-  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
   const signature = await key.sign("ES256", message, "base64url");
@@ -123,7 +123,7 @@ test("signature", async () => {
 
 test("verify", async () => {
   const key = new Secp256r1();
-  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
   const signature = await key.sign("ES256", message, "base64url");
@@ -134,9 +134,9 @@ test("verify", async () => {
 
 test("toJWK", async () => {
   const key = new Secp256r1();
-  key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
-  const jwk = key.toJWK();
+  const jwk = await key.toJWK();
   expect(jwk.kty).toBe("EC");
   expect(jwk.crv).toBe("P-256");
   expect(jwk.x).toBe("xuJ5LJvgY5ageBUbyJ5vVTQSyrAAx-xxxbmSk4NW2YA");
@@ -156,7 +156,7 @@ test("toJWK", async () => {
   expect(ckey.usages).toStrictEqual(jwk.key_ops);
 });
 
-test("import JWK", () => {
+test("import JWK", async () => {
   const jwk = {
     kty: "EC",
     crv: "P-256",
@@ -164,6 +164,6 @@ test("import JWK", () => {
     y: "ZHujYr-HhNmVrtdf4icztCM2eMJ6XCq42MwwuhkD6dE",
   };
   const key = new Secp256r1();
-  key.importFromJWK(jwk);
+  await key.importFromJWK(jwk);
   expect(key.exportPublicKey()).toBe(pubkeyhex);
 });

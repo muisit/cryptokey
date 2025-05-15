@@ -13,11 +13,11 @@ export abstract class CryptoKey {
     this.publicKeyBytes = null;
   }
 
-  abstract createPrivateKey(): void;
+  abstract createPrivateKey(): Promise<void>;
   abstract algorithms(): string[];
-  abstract importFromJWK(jwk: JsonWebKey): void;
+  abstract importFromJWK(jwk: JsonWebKey): Promise<void>;
 
-  importFromManagedKey(mkey: IKey) {
+  async importFromManagedKey(mkey: IKey) {
     if (mkey.publicKeyHex) {
       this.publicKeyBytes = this.hexToBytes(mkey.publicKeyHex);
     }
@@ -56,7 +56,7 @@ export abstract class CryptoKey {
     data: Uint8Array,
   ): Promise<boolean>;
 
-  initialisePrivateKey(key: any) {
+  async initialisePrivateKey(key: any) {
     this.privateKeyBytes = key;
   }
 
@@ -111,5 +111,5 @@ export abstract class CryptoKey {
   }
 
   // creating a JWK is very key specific, but straight forward, so no reason to abstract in a convertor
-  abstract toJWK(): crypto.JsonWebKey;
+  abstract toJWK(alg?:string): Promise<crypto.JsonWebKey>;
 }

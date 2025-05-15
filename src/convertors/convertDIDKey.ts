@@ -4,8 +4,7 @@ import { Factory } from "../Factory";
 import { CryptoKey } from "../CryptoKey";
 import { convertFromDIDJWKBytes } from "./convertDIDJWK";
 
-export function convertFromDIDKey(didUrl: string) {
-  try {
+export async function convertFromDIDKey(didUrl: string): Promise<CryptoKey> {
     if (!didUrl.startsWith("did:key:")) {
       throw new Error("Unable to decode did:key " + didUrl);
     }
@@ -21,19 +20,22 @@ export function convertFromDIDKey(didUrl: string) {
     // https://github.com/multiformats/multicodec/blob/master/table.csv
     switch (codec[0]) {
       case 0xec: //        x25519-pub,                     key,            0xec,           draft,      Curve25519 public key
-        key = Factory.createFromType("x25519");
+        key = await Factory.createFromType("x25519");
         break;
       case 0xed: //        ed25519-pub,                    key,            0xed,           draft,      Ed25519 public key
-        key = Factory.createFromType("Ed25519");
+        key = await Factory.createFromType("Ed25519");
         break;
       case 0xe7: //        secp256k1-pub,                  key,            0xe7,           draft,      Secp256k1 public key (compressed)
-        key = Factory.createFromType("Secp256k1");
+        key = await Factory.createFromType("Secp256k1");
         break;
       case 0x1200: //      p256-pub,                       key,            0x1200,         draft,      P-256 public Key (compressed)
-        key = Factory.createFromType("Secp256r1");
+        key = await Factory.createFromType("Secp256r1");
         break;
       case 0xeb51: //      jwk_jcs-pub,                    key,            0xeb51,         draft,      JSON object containing only the required members of a JWK (RFC 7518 and RFC 7517) representing the public key. Serialisation based on JCS (RFC 8785)
-        return convertFromDIDJWKBytes(pubkey);
+        return await convertFromDIDJWKBytes(pubkey);
+      case 0x1205: //      rsa-pub,                        key,            0x1205,         draft,      RSA public key. DER-encoded ASN.1 type RSAPublicKey according to IETF RFC 8017 (PKCS #1)
+        key = await Factory.createFromType("RSA");
+        break;
       case 0xa0: //        aes-128,                        key,            0xa0,           draft,      128-bit AES symmetric key
       case 0xa1: //        aes-192,                        key,            0xa1,           draft,      192-bit AES symmetric key
       case 0xa2: //        aes-256,                        key,            0xa2,           draft,      256-bit AES symmetric key
@@ -47,7 +49,6 @@ export function convertFromDIDKey(didUrl: string) {
       case 0x1202: //      p521-pub,                       key,            0x1202,         draft,      P-521 public Key (compressed)
       case 0x1203: //      ed448-pub,                      key,            0x1203,         draft,      Ed448 public Key
       case 0x1204: //      x448-pub,                       key,            0x1204,         draft,      X448 public Key
-      case 0x1205: //      rsa-pub,                        key,            0x1205,         draft,      RSA public key. DER-encoded ASN.1 type RSAPublicKey according to IETF RFC 8017 (PKCS #1)
       case 0x1206: //      sm2-pub,                        key,            0x1206,         draft,      SM2 public key (compressed)
       case 0x120b: //      mlkem-512-pub,                  key,            0x120b,         draft,      ML-KEM 512 public key; as specified by FIPS 203
       case 0x120c: //      mlkem-768-pub,                  key,            0x120c,         draft,      ML-KEM 768 public key; as specified by FIPS 203
@@ -69,11 +70,7 @@ export function convertFromDIDKey(didUrl: string) {
       key.setPublicKey(key.bytesToHex(pubkey));
       return key;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e: any) {
-    return null;
-  }
-  return null;
+    throw new Error("Could not decode did:key");
 }
 
 export function convertToMultibase(key: CryptoKey): string {
@@ -96,6 +93,10 @@ export function convertToMultibase(key: CryptoKey): string {
       encoding = 0xe7;
       pubkey = key.publicKey();
       break;
+    case "RSA":
+      encoding = 0x1205;
+      pubkey = key.publicKey();
+      break;
     default:
       throw new Error(
         "Unable to convert key type " + key.keyType + " to a did:key",
@@ -109,6 +110,6 @@ export function convertToMultibase(key: CryptoKey): string {
   return bases.base58btc.encode(multicodecEncoding);
 }
 
-export function convertToDIDKey(key: CryptoKey): string {
+export async function convertToDIDKey(key: CryptoKey): Promise<string> {
   return "did:key:" + convertToMultibase(key);
 }

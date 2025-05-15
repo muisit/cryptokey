@@ -10,7 +10,7 @@ import { convertToDIDJWK } from "./convertDIDJWK";
 import { Factory } from "../Factory";
 
 // https://www.w3.org/TR/did-1.0/
-export function convertToDIDDocument(
+export async function convertToDIDDocument(
   key: CryptoKey,
   publicKeyFormat: VerificationMethods = VerificationMethods.JsonWebKey,
   verificationMethodType?: string,
@@ -21,18 +21,18 @@ export function convertToDIDDocument(
   //let keyAgreementKeyFormat:SupportedVerificationMethods = publicKeyFormat;
   switch (publicKeyFormat) {
     case VerificationMethods.JsonWebKey:
-      did = did || convertToDIDJWK(key);
+      did = did || await convertToDIDJWK(key);
       verificationMethod = {
         // did:jwk spec defines that the key is referenced as #0
         id: did + "#0",
         // there is a discontinued vc-jws spec that defines JsonWebKey2020, but it is the same
         type: verificationMethodType || "JsonWebKey",
-        publicKeyJwk: key.toJWK() as JsonWebKeyDID,
+        publicKeyJwk: await key.toJWK() as JsonWebKeyDID,
         controller: did,
       };
       break;
     case VerificationMethods.Multikey:
-      did = did || convertToDIDKey(key);
+      did = did || await convertToDIDKey(key);
       verificationMethod = {
         // did:key spec defines that the key is referenced with the multi-codec-value
         id: did + "#" + convertToMultibase(key),
@@ -77,14 +77,14 @@ export function convertToDIDDocument(
   return result;
 }
 
-export function convertFromDIDDocument(doc: DIDDocument) {
+export async function convertFromDIDDocument(doc: DIDDocument) {
   if (doc["verificationMethod"]) {
     // just pick the first we understand
     for (const methods of doc["verificationMethod"]) {
       if (methods.publicKeyJwk) {
-        return Factory.createFromJWK(methods.publicKeyJwk);
+        return await Factory.createFromJWK(methods.publicKeyJwk);
       } else if (methods.publicKeyMultibase) {
-        return Factory.createFromDIDKey(
+        return await Factory.createFromDIDKey(
           "did:key:" + methods.publicKeyMultibase,
         );
       }
