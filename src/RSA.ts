@@ -1,6 +1,6 @@
 import { CryptoKey } from "./CryptoKey";
+import { createPrivateKey, createPublicKey } from 'crypto';
 import { generateKeyPair, exportSPKI, importSPKI, exportPKCS8, importPKCS8, exportJWK, importJWK, KeyObject } from "jose";
-import { toString } from "uint8arrays";
 import * as crypto from 'node:crypto';
 
 export class RSA extends CryptoKey {
@@ -10,14 +10,21 @@ export class RSA extends CryptoKey {
   }
 
   async createPrivateKey() {
-    await this.initialisePrivateKey();
+    const { privateKey } = await generateKeyPair('RS256', { modulusLength: 2048, extractable: true });
+    await this.createPrivateKeyFromPEM(await exportPKCS8(privateKey));
   }
 
   async initialisePrivateKey(keyData?: Uint8Array)
   {
-    const { privateKey, publicKey} = await generateKeyPair('RS256', { modulusLength: 2048, extractable: true });
-    await this.createPrivateKeyFromPEM(await exportPKCS8(privateKey));
-    await this.createPublicKeyFromPEM(await exportSPKI(publicKey));
+    if (!keyData) {
+      await this.createPrivateKey();
+    }
+    else {
+      this.privateKeyBytes = keyData;
+      const privkey = await this.createCryptoKeyFromPrivateKey();
+      const pubkey = createPublicKey(privkey);
+      await this.createPublicKeyFromPEM(await exportSPKI(pubkey));
+    }
   }
 
   async createPublicKeyFromPEM(pem:string)
@@ -30,26 +37,32 @@ export class RSA extends CryptoKey {
   {
     const b64 = pem.replace(/-----BEGIN PRIVATE KEY-----/, '').replace(/-----END PRIVATE KEY-----/, '').replace(/\s+/g, '');
     this.privateKeyBytes = this.base64ToBytes(b64);
+
+    // if we set the private key, determine the correct public key as well
+    const privkey = createPrivateKey(pem);
+    const pubkey = createPublicKey(privkey);
+    await this.createPublicKeyFromPEM(await exportSPKI(pubkey));
   }
 
-  async createJoseKeyFromPrivateKey()
+  // this returns a 'key-like' object, which is an abstraction of raw key bytes
+  async createCryptoKeyFromPrivateKey()
   {
-    const pkHex = toString(this.privateKey(), 'base64');
-    const pkHexBlocks = pkHex.match(/.{1,64}/g).join('\/');
-    const pem = '-----BEGIN PRIVATE KEY-----\n' + pkHexBlocks + '\n-----END PRIVATE KEY-----';
-    return await importPKCS8(pem, 'RS256');
+    const pkHex = this.bytesToBase64(this.privateKey(), true);
+    const pkHexBlocks = pkHex.match(/.{1,64}/g)!.join('\n');
+    const pem = '-----BEGIN PRIVATE KEY-----\n' + pkHexBlocks + '\n-----END PRIVATE KEY-----\n';
+    return await importPKCS8(pem, 'RS256', {extractable:true});
   }
 
-  async createJoseKeyFromPublicKey()
+  async createCryptoKeyFromPublicKey()
   {
-    const pkHex = toString(this.publicKey(), 'base64');
-    const pkHexBlocks = pkHex.match(/.{1,64}/g).join('\/');
-    const pem = '-----BEGIN PUBLIC KEY-----\n' + pkHexBlocks + '\n-----END PUBLIC KEY-----';
-    return await importSPKI(pem, 'RS256');
+    const pkHex = this.bytesToBase64(this.publicKey(), true);
+    const pkHexBlocks = pkHex.match(/.{1,64}/g)!.join('\n');
+    const pem = '-----BEGIN PUBLIC KEY-----\n' + pkHexBlocks + '\n-----END PUBLIC KEY-----\n';
+    return await importSPKI(pem, 'RS256', {extractable:true});
   }
 
   async toJWK(alg?:string): Promise<crypto.JsonWebKey> {
-    const jkey = await this.createJoseKeyFromPublicKey();
+    const jkey = this.createCryptoKeyFromPublicKey();
     const retval = await exportJWK(jkey) as crypto.JsonWebKey;
     retval.alg = alg || 'RS256';
     retval.use = 'sig';
@@ -76,7 +89,7 @@ export class RSA extends CryptoKey {
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
       );
     }
-    const key = await this.createJoseKeyFromPrivateKey();
+    const key = await this.createCryptoKeyFromPrivateKey();
     return new Uint8Array(await crypto.subtle.sign(algorithm, key, data));
   }
 
@@ -87,7 +100,7 @@ export class RSA extends CryptoKey {
       );
     }
 
-    const key = await this.createJoseKeyFromPublicKey();
+    const key = await this.createCryptoKeyFromPublicKey();
     const isValid = await crypto.subtle.verify(algorithm, key, signature, data);
     if (isValid) {
       return true;

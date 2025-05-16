@@ -71,8 +71,13 @@ export abstract class CryptoKey {
     }
     return fromString(input, "base16");
   }
-  public bytesToBase64(bytes: Uint8Array): string {
-    return toString(bytes, "base64");
+  public bytesToBase64(bytes: Uint8Array, doPad = false): string {
+    const retval:string = toString(bytes, "base64");
+    if (doPad) {
+      const missingPadding = (4 - (retval.length % 4)) % 4;
+      return retval + '='.repeat(missingPadding);
+    }
+    return retval;
   }
   public base64ToBytes(buffer: string) {
     return fromString(buffer, "base64");
