@@ -67,7 +67,7 @@ export async function convertFromDIDKey(didUrl: string): Promise<CryptoKey> {
 
     if (key !== null) {
       // implementation is easy, but could be delegated to the key as importFromDID
-      key.setPublicKey(key.bytesToHex(pubkey));
+      key.setPublicKey(CryptoKey.bytesToHex(pubkey));
       return key;
     }
     throw new Error("Could not decode did:key");

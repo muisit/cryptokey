@@ -18,22 +18,22 @@ export class Secp256r1 extends CryptoKey {
   async createPrivateKey() {
     const key = crypto.createECDH("prime256v1");
     key.generateKeys();
-    await this.initialisePrivateKey(this.hexToBytes(key.getPrivateKey("hex")));
+    await this.initialisePrivateKey(CryptoKey.hexToBytes(key.getPrivateKey("hex")));
   }
 
   async initialisePrivateKey(key: any) {
     const secpkey = crypto.createECDH("prime256v1");
     secpkey.setPrivateKey(key);
     this.privateKeyBytes = key;
-    this.publicKeyBytes = this.hexToBytes(
+    this.publicKeyBytes = CryptoKey.hexToBytes(
       secpkey.getPublicKey("hex", "compressed"),
     );
   }
 
   compressedToUncompressed(key: Uint8Array) {
-    const point = p256.ProjectivePoint.fromHex(this.bytesToHex(key));
+    const point = p256.ProjectivePoint.fromHex(CryptoKey.bytesToHex(key));
     const uncompressedHex = point.toHex(false);
-    return this.hexToBytes(uncompressedHex);
+    return CryptoKey.hexToBytes(uncompressedHex);
   }
 
   async toJWK(alg?:string): Promise<crypto.JsonWebKey> {
@@ -41,7 +41,7 @@ export class Secp256r1 extends CryptoKey {
     return {
       kty: "EC",
       crv: "P-256",
-      kid: this.bytesToHex(this.publicKey()),
+      kid: CryptoKey.bytesToHex(this.publicKey()),
       use: "sig",
       key_ops: ["verify"],
       alg: alg || "ES256",
@@ -54,8 +54,8 @@ export class Secp256r1 extends CryptoKey {
     if (jwk.kty == "EC" && jwk.crv == "P-256" && jwk.x && jwk.y) {
       const uncompressed = new Uint8Array(65);
       uncompressed.set([0x04], 0);
-      uncompressed.set(this.base64UrlToBytes(jwk.x), 1);
-      uncompressed.set(this.base64UrlToBytes(jwk.y), 33);
+      uncompressed.set(CryptoKey.base64UrlToBytes(jwk.x), 1);
+      uncompressed.set(CryptoKey.base64UrlToBytes(jwk.y), 33);
       this.publicKeyBytes =
         p256.ProjectivePoint.fromHex(uncompressed).toRawBytes(true);
     }

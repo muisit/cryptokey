@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { TKeyType } from "@veramo/core-types";
 import { Ed25519 } from "../src/Ed25519";
 import { Factory } from "../src/Factory";
+import { CryptoKey } from "../src/CryptoKey";
 
 const privkeyhex =
   "fbe04e71bce89f37e0970de16a97a80c4457250c6fe0b1e9297e6df778ae72a8";
@@ -23,7 +24,7 @@ test("Initialise key", async () => {
 
 test("import private key", async () => {
   const key = new Ed25519();
-  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(CryptoKey.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(key.privateKeyBytes === null).toBeFalsy();
   expect(key.privateKeyBytes!.length).toBe(32);
@@ -48,7 +49,7 @@ test("import from DID", async () => {
 
 test("export to DID", async () => {
   const key = new Ed25519();
-  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(CryptoKey.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   expect(await Factory.toDIDKey(key)).toBe(
     "did:key:z6Mkkf9RiKeaAFaQzQGT2zfqqwCYYbPTNhQvyGXjKJ84kW88",
@@ -96,7 +97,7 @@ test("import from managed public key", async () => {
 
 test("signature", async () => {
   const key = new Ed25519();
-  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(CryptoKey.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
   const signature = await key.sign("EdDSA", message, "base64url");
@@ -122,21 +123,21 @@ test("signature", async () => {
 
 test("verify", async () => {
   const key = new Ed25519();
-  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(CryptoKey.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
   const message = Buffer.from("Message Data", "utf-8");
   const signature = await key.sign("EdDSA", message, "base64url");
   expect(signature).toBe(
     "9Ud-wtY9H6nftjYnPdKu0nK48yV42EZWjMH5ahq-r6BEl5THBh8ze4_Tr816zIYQKocMgLs8H1Tu8uaTHLbqBg",
   );
-  const sigbytes = key.base64UrlToBytes(signature);
+  const sigbytes = CryptoKey.base64UrlToBytes(signature);
   expect(sigbytes.length).toBe(64);
   expect(await key.verify("EdDSA", sigbytes, message)).toBeTruthy();
 });
 
 test("create JWK", async () => {
   const key = new Ed25519();
-  await key.initialisePrivateKey(key.hexToBytes(privkeyhex));
+  await key.initialisePrivateKey(CryptoKey.hexToBytes(privkeyhex));
   expect(key.hasPrivateKey()).toBeTruthy();
 
   const jwk = await key.toJWK();

@@ -22,7 +22,7 @@ export class RSA extends CryptoKey {
     else {
       this.privateKeyBytes = keyData;
       const privkey = await this.createCryptoKeyFromPrivateKey();
-      const pubkey = createPublicKey(privkey);
+      const pubkey = createPublicKey((privkey as unknown) as Buffer); // type casting to keep lint happy
       await this.createPublicKeyFromPEM(await exportSPKI(pubkey));
     }
   }
@@ -30,13 +30,13 @@ export class RSA extends CryptoKey {
   async createPublicKeyFromPEM(pem:string)
   {
     const b64 = pem.replace(/-----BEGIN PUBLIC KEY-----/, '').replace(/-----END PUBLIC KEY-----/, '').replace(/\s+/g, '');
-    this.publicKeyBytes = this.base64ToBytes(b64);
+    this.publicKeyBytes = CryptoKey.base64ToBytes(b64);
   }
 
   async createPrivateKeyFromPEM(pem:string)
   {
     const b64 = pem.replace(/-----BEGIN PRIVATE KEY-----/, '').replace(/-----END PRIVATE KEY-----/, '').replace(/\s+/g, '');
-    this.privateKeyBytes = this.base64ToBytes(b64);
+    this.privateKeyBytes = CryptoKey.base64ToBytes(b64);
 
     // if we set the private key, determine the correct public key as well
     const privkey = createPrivateKey(pem);
@@ -45,24 +45,24 @@ export class RSA extends CryptoKey {
   }
 
   // this returns a 'key-like' object, which is an abstraction of raw key bytes
-  async createCryptoKeyFromPrivateKey()
+  async createCryptoKeyFromPrivateKey(alg:string = 'RS256')
   {
-    const pkHex = this.bytesToBase64(this.privateKey(), true);
+    const pkHex = CryptoKey.bytesToBase64(this.privateKey(), true);
     const pkHexBlocks = pkHex.match(/.{1,64}/g)!.join('\n');
     const pem = '-----BEGIN PRIVATE KEY-----\n' + pkHexBlocks + '\n-----END PRIVATE KEY-----\n';
-    return await importPKCS8(pem, 'RS256', {extractable:true});
+    return await importPKCS8(pem, alg, {extractable:true});
   }
 
-  async createCryptoKeyFromPublicKey()
+  async createCryptoKeyFromPublicKey(alg:string = 'RS256')
   {
-    const pkHex = this.bytesToBase64(this.publicKey(), true);
+    const pkHex = CryptoKey.bytesToBase64(this.publicKey(), true);
     const pkHexBlocks = pkHex.match(/.{1,64}/g)!.join('\n');
     const pem = '-----BEGIN PUBLIC KEY-----\n' + pkHexBlocks + '\n-----END PUBLIC KEY-----\n';
-    return await importSPKI(pem, 'RS256', {extractable:true});
+    return await importSPKI(pem, alg, {extractable:true});
   }
 
   async toJWK(alg?:string): Promise<crypto.JsonWebKey> {
-    const jkey = this.createCryptoKeyFromPublicKey();
+    const jkey = await this.createCryptoKeyFromPublicKey();
     const retval = await exportJWK(jkey) as crypto.JsonWebKey;
     retval.alg = alg || 'RS256';
     retval.use = 'sig';
@@ -74,7 +74,7 @@ export class RSA extends CryptoKey {
     if (jwk.kty == "RSA" && jwk.n && jwk.e) {
       const publicKey = await importJWK(jwk, jwk.alg || 'RS256');
       // is the below needed, or can we just use the bytes of the publicKey directly
-      const pem = await exportPKCS8(publicKey as KeyObject);
+      const pem = await exportSPKI(publicKey as KeyObject);
       await this.createPublicKeyFromPEM(pem);
     }
   }
@@ -89,8 +89,9 @@ export class RSA extends CryptoKey {
         "Algorithm " + algorithm + " not supported on key type " + this.keyType,
       );
     }
-    const key = await this.createCryptoKeyFromPrivateKey();
-    return new Uint8Array(await crypto.subtle.sign(algorithm, key, data));
+    const key = await this.createCryptoKeyFromPrivateKey(algorithm);
+    const algo = this.algorithmToSubtleAlgorithm(algorithm);
+    return new Uint8Array(await crypto.subtle.sign(algo, key, data));
   }
 
   async verify(algorithm: string, signature: Uint8Array, data: Uint8Array) {
@@ -100,11 +101,21 @@ export class RSA extends CryptoKey {
       );
     }
 
-    const key = await this.createCryptoKeyFromPublicKey();
-    const isValid = await crypto.subtle.verify(algorithm, key, signature, data);
+    const key = await this.createCryptoKeyFromPublicKey(algorithm);
+    const isValid = await crypto.subtle.verify(this.algorithmToSubtleAlgorithm(algorithm), key, signature, data);
     if (isValid) {
       return true;
     }
     return false;
+  }
+
+  private algorithmToSubtleAlgorithm(alg:string)
+  {
+    if (alg == 'RS512') {
+      return {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-512'}};
+    }
+    else {
+      return {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};
+    }
   }
 }

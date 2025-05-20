@@ -42,7 +42,7 @@ export class Factory {
     }
 
     if (privateKeyHex) {
-      await key.initialisePrivateKey(key.hexToBytes(privateKeyHex));
+      await key.initialisePrivateKey(CryptoKey.hexToBytes(privateKeyHex));
     }
     return key;
   }

@@ -26,7 +26,7 @@ export class Ed25519 extends CryptoKey {
     return {
       kty: "OKP",
       crv: "Ed25519",
-      kid: this.bytesToHex(this.publicKey()),
+      kid: CryptoKey.bytesToHex(this.publicKey()),
       use: "sig",
       key_ops: ["verify"],
       alg: alg || "EdDSA",
@@ -36,7 +36,7 @@ export class Ed25519 extends CryptoKey {
 
   async importFromJWK(jwk: JsonWebKey) {
     if (jwk.kty == "OKP" && jwk.crv == "Ed25519" && jwk.x) {
-      this.publicKeyBytes = this.base64UrlToBytes(jwk.x);
+      this.publicKeyBytes = CryptoKey.base64UrlToBytes(jwk.x);
     }
   }
 

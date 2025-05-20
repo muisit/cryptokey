@@ -19,10 +19,10 @@ export abstract class CryptoKey {
 
   async importFromManagedKey(mkey: IKey) {
     if (mkey.publicKeyHex) {
-      this.publicKeyBytes = this.hexToBytes(mkey.publicKeyHex);
+      this.publicKeyBytes = CryptoKey.hexToBytes(mkey.publicKeyHex);
     }
     if (mkey.privateKeyHex) {
-      this.privateKeyBytes = this.hexToBytes(mkey.privateKeyHex);
+      this.privateKeyBytes = CryptoKey.hexToBytes(mkey.privateKeyHex);
     }
   }
 
@@ -60,10 +60,10 @@ export abstract class CryptoKey {
     this.privateKeyBytes = key;
   }
 
-  public bytesToHex(bytes: Uint8Array): string {
+  public static bytesToHex(bytes: Uint8Array): string {
     return toString(bytes, "base16");
   }
-  public hexToBytes(buffer: string): Uint8Array {
+  public static hexToBytes(buffer: string): Uint8Array {
     let input = buffer.startsWith("0x") ? buffer.substring(2) : buffer;
 
     if (input.length % 2 !== 0) {
@@ -71,7 +71,7 @@ export abstract class CryptoKey {
     }
     return fromString(input, "base16");
   }
-  public bytesToBase64(bytes: Uint8Array, doPad = false): string {
+  public static bytesToBase64(bytes: Uint8Array, doPad = false): string {
     const retval:string = toString(bytes, "base64");
     if (doPad) {
       const missingPadding = (4 - (retval.length % 4)) % 4;
@@ -79,13 +79,13 @@ export abstract class CryptoKey {
     }
     return retval;
   }
-  public base64ToBytes(buffer: string) {
+  public static base64ToBytes(buffer: string) {
     return fromString(buffer, "base64");
   }
-  public bytesToBase64Url(bytes: Uint8Array): string {
+  public static bytesToBase64Url(bytes: Uint8Array): string {
     return toString(bytes, "base64url");
   }
-  public base64UrlToBytes(buffer: string) {
+  public static base64UrlToBytes(buffer: string) {
     return fromString(buffer, "base64url");
   }
 
@@ -96,10 +96,10 @@ export abstract class CryptoKey {
     return this.publicKeyBytes ?? new Uint8Array();
   }
   exportPublicKey(): string {
-    return this.bytesToHex(this.publicKey());
+    return CryptoKey.bytesToHex(this.publicKey());
   }
   setPublicKey(publicKeyHex: string) {
-    this.publicKeyBytes = this.hexToBytes(publicKeyHex);
+    this.publicKeyBytes = CryptoKey.hexToBytes(publicKeyHex);
   }
 
   hasPrivateKey(): boolean {
@@ -109,10 +109,10 @@ export abstract class CryptoKey {
     return this.privateKeyBytes ?? new Uint8Array();
   }
   exportPrivateKey(): string {
-    return this.bytesToHex(this.privateKey());
+    return CryptoKey.bytesToHex(this.privateKey());
   }
   setPrivateKey(privateKeyHex: string) {
-    this.privateKeyBytes = this.hexToBytes(privateKeyHex);
+    this.privateKeyBytes = CryptoKey.hexToBytes(privateKeyHex);
   }
 
   // creating a JWK is very key specific, but straight forward, so no reason to abstract in a convertor
