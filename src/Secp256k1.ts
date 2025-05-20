@@ -14,7 +14,9 @@ export class Secp256k1 extends CryptoKey {
   async createPrivateKey() {
     const key = crypto.createECDH("secp256k1");
     key.generateKeys();
-    await this.initialisePrivateKey(CryptoKey.hexToBytes(key.getPrivateKey("hex")));
+    await this.initialisePrivateKey(
+      CryptoKey.hexToBytes(key.getPrivateKey("hex")),
+    );
   }
 
   async initialisePrivateKey(key: any) {
@@ -32,7 +34,7 @@ export class Secp256k1 extends CryptoKey {
     return CryptoKey.hexToBytes(uncompressedHex);
   }
 
-  async toJWK(alg?:string): Promise<crypto.JsonWebKey> {
+  async toJWK(alg?: string): Promise<crypto.JsonWebKey> {
     const uncompressed = this.compressedToUncompressed(this.publicKey());
     return {
       kty: "EC",

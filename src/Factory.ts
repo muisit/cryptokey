@@ -76,7 +76,9 @@ export class Factory {
     return await convertToDIDJWK(key);
   }
 
-  public static async createFromManagedKey(mkey: ManagedKeyInfo): Promise<CryptoKey> {
+  public static async createFromManagedKey(
+    mkey: ManagedKeyInfo,
+  ): Promise<CryptoKey> {
     let key: CryptoKey;
     switch ((mkey.type as string).toLowerCase()) {
       case "ed25519":

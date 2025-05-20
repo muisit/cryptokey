@@ -21,18 +21,18 @@ export async function convertToDIDDocument(
   //let keyAgreementKeyFormat:SupportedVerificationMethods = publicKeyFormat;
   switch (publicKeyFormat) {
     case VerificationMethods.JsonWebKey:
-      did = did || await convertToDIDJWK(key);
+      did = did || (await convertToDIDJWK(key));
       verificationMethod = {
         // did:jwk spec defines that the key is referenced as #0
         id: did + "#0",
         // there is a discontinued vc-jws spec that defines JsonWebKey2020, but it is the same
         type: verificationMethodType || "JsonWebKey",
-        publicKeyJwk: await key.toJWK() as JsonWebKeyDID,
+        publicKeyJwk: (await key.toJWK()) as JsonWebKeyDID,
         controller: did,
       };
       break;
     case VerificationMethods.Multikey:
-      did = did || await convertToDIDKey(key);
+      did = did || (await convertToDIDKey(key));
       verificationMethod = {
         // did:key spec defines that the key is referenced with the multi-codec-value
         id: did + "#" + convertToMultibase(key),

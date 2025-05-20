@@ -22,7 +22,7 @@ export class Ed25519 extends CryptoKey {
     this.publicKeyBytes = ed25519.getPublicKey(this.privateKeyBytes!);
   }
 
-  async toJWK(alg?:string): Promise<crypto.JsonWebKey> {
+  async toJWK(alg?: string): Promise<crypto.JsonWebKey> {
     return {
       kty: "OKP",
       crv: "Ed25519",

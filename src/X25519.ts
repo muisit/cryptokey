@@ -31,7 +31,8 @@ export class X25519 extends CryptoKey {
     this.publicKeyBytes = x25519.getPublicKey(this.privateKeyBytes!);
   }
 
-  async toJWK(alg?:string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async toJWK(alg?: string) {
     return {
       kty: "OKP",
       crv: "X25519",

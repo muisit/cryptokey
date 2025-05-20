@@ -72,10 +72,10 @@ export abstract class CryptoKey {
     return fromString(input, "base16");
   }
   public static bytesToBase64(bytes: Uint8Array, doPad = false): string {
-    const retval:string = toString(bytes, "base64");
+    const retval: string = toString(bytes, "base64");
     if (doPad) {
       const missingPadding = (4 - (retval.length % 4)) % 4;
-      return retval + '='.repeat(missingPadding);
+      return retval + "=".repeat(missingPadding);
     }
     return retval;
   }
@@ -116,5 +116,5 @@ export abstract class CryptoKey {
   }
 
   // creating a JWK is very key specific, but straight forward, so no reason to abstract in a convertor
-  abstract toJWK(alg?:string): Promise<crypto.JsonWebKey>;
+  abstract toJWK(alg?: string): Promise<crypto.JsonWebKey>;
 }

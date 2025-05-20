@@ -10,7 +10,9 @@ export async function convertFromDIDJWK(didUrl: string): Promise<CryptoKey> {
   return await convertFromDIDJWKBytes(fromString(encoded, "base64url"));
 }
 
-export async function convertFromDIDJWKBytes(bytes: Uint8Array): Promise<CryptoKey> {
+export async function convertFromDIDJWKBytes(
+  bytes: Uint8Array,
+): Promise<CryptoKey> {
   const jsonString = toString(bytes, "utf-8");
   const jwk = JSON.parse(jsonString);
   if (jwk && Object.keys(jwk) && jwk.kty && jwk.crv) {
