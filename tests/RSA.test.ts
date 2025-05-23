@@ -247,3 +247,16 @@ test("import JWK", async () => {
   await key.importFromJWK(jwk);
   expect(key.exportPublicKey()).toBe(pubkeyhex);
 });
+
+test("import JWK(2)", async () => {
+  const jwk = {
+    "e": "AQAB",
+    "kty": "RSA",
+    "n": "rNczEGou3w9tbNXUtzFeiZDcKJrCHJ9jEKnjlXaJ5xH5eGi2qcP8M6XqKUNRXB6VD-A2SqGehdR7liZG_bvfPlMxlcWgLW9sY0N6BNxrk9U85xyK1jJgAkGqyhnzElunE3Dq6Nurr09LDwE08aF5wg6pViX5KfdCSC7wtFEx734WbqaQplvIcErgslRPa2KuzG5kLmWTUj3tPfg4YmbUZ6uoOsGKRS46c9zkv5mhZ0rUzXXTlJc9outVgfajlWJDt8oiR4rRBJV4-RLqCd9dsO3My5ma-cDGntUff7kKfhN-cwSev6y3aMUme7u4VhE00dmcEGX9RYorUuj2LOPhpw"
+  };
+  const key = new RSA();
+  await key.importFromJWK(jwk);
+  const jwk2 = await exportJWK(await key.createCryptoKeyFromPublicKey());
+  expect(jwk2.n).toBe('rNczEGou3w9tbNXUtzFeiZDcKJrCHJ9jEKnjlXaJ5xH5eGi2qcP8M6XqKUNRXB6VD-A2SqGehdR7liZG_bvfPlMxlcWgLW9sY0N6BNxrk9U85xyK1jJgAkGqyhnzElunE3Dq6Nurr09LDwE08aF5wg6pViX5KfdCSC7wtFEx734WbqaQplvIcErgslRPa2KuzG5kLmWTUj3tPfg4YmbUZ6uoOsGKRS46c9zkv5mhZ0rUzXXTlJc9outVgfajlWJDt8oiR4rRBJV4-RLqCd9dsO3My5ma-cDGntUff7kKfhN-cwSev6y3aMUme7u4VhE00dmcEGX9RYorUuj2LOPhpw');
+  expect(jwk2.e).toBe('AQAB');
+})
