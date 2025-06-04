@@ -4,6 +4,8 @@ import { Secp256r1 } from "../src/Secp256r1";
 import * as crypto from "node:crypto";
 import { Factory } from "../src/Factory";
 import { CryptoKey } from "../src/CryptoKey";
+import { ec } from 'elliptic';
+import { toString, fromString } from 'uint8arrays';
 
 const privkeyhex =
   "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11";
@@ -167,4 +169,41 @@ test("import JWK", async () => {
   const key = new Secp256r1();
   await key.importFromJWK(jwk);
   expect(key.exportPublicKey()).toBe(pubkeyhex);
+});
+
+test("case: private key conversion issues", async () => {
+  const keys = [
+    "780d0b34863626ead5cf6a4c63229bd83b0491c739ca370e5656ebcd30f0b719",
+    "314230f7386428ef4ec3f060ad45e8801055c72e9f7d1f0dd6fca2ef7780b8e5",
+    "7311657d96b840db111792d1fd0984f34fd472e05169c6cc3d044327ec5d9a87",
+    "b3ebe20b402425da6bf8d5adc2523aa0824a53ad95cbd375167257c034dacd79",
+    "3fcb7cb4bb434755df930dbb4a9165d566c72c005feb0817235c3183a72844f7",
+    "48e92cb0a2f213491af2fb269b470ce36e5db27aaf956827d84518c14938cf0d",
+    "c9e01f9295b8336854bb2027500f5702f55f4fcfd8040894e36ab606b8c583f1",
+    "a8fd4f9d4c432a40799e6642642951191c78b1baf422a668dd5fa79c50d0d244",
+    "ce988a72edaf94bc24589fa4ac4a9271a7edafdd2033dd8d386ef7575039511c"
+  ];
+
+  for (const pkey of keys) {
+    const key = new Secp256r1();
+    await key.initialisePrivateKey(CryptoKey.hexToBytes(pkey));
+    expect(key.hasPrivateKey()).toBeTruthy();
+    expect(key.privateKeyBytes === null).toBeFalsy();
+    expect(key.privateKeyBytes!.length).toBe(32);
+    expect(key.hasPublicKey()).toBeTruthy();
+    expect(key.publicKeyBytes === null).toBeFalsy();
+    expect(key.publicKeyBytes!.length).toBe(33);
+    expect(key.exportPrivateKey()).toBe(pkey);
+
+    const curve = new ec('p256');
+    const eckey = curve.keyFromPrivate(pkey, 16);
+    const encoded = curve.sign(fromString(pkey, 'utf-8'), pkey, 16);
+    const verified = eckey.verify(fromString(pkey, 'utf-8'), encoded, eckey.getPublic());
+    expect(verified).toBeTruthy();
+  }
+});
+
+test("case: jwk conversion issues", async () => {
+  const jwk = {"alg":"ES256","use":"sig","kty":"EC","crv":"P-256","x":"2Aid8BULnxp60VvY6juu1fNrEbM02qucl6k3P3oA0w","y":"5u6XAjfCjPfiw2Tj_pHj7BPgZZ4coUZLtjSfaMviKms","kid":"LKZBjBfSVDPNl9hJWvtsxb8IBi9SMXf2deBMDqaw7xw"};
+  await expect(() => Factory.createFromJWK(jwk)).rejects.toThrow("bad point: equation left != right");
 });
