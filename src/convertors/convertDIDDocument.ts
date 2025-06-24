@@ -15,8 +15,12 @@ export async function convertToDIDDocument(
   publicKeyFormat: VerificationMethods = VerificationMethods.JsonWebKey,
   verificationMethodType?: string,
   did?: string,
+  services?: any,
 ) {
   let verificationMethod: VerificationMethod;
+
+  // we can choose how we refer to the key in this document, so we take the JWK case: just use #0
+  const keyRef: string = "#0";
 
   //let keyAgreementKeyFormat:SupportedVerificationMethods = publicKeyFormat;
   switch (publicKeyFormat) {
@@ -24,7 +28,7 @@ export async function convertToDIDDocument(
       did = did || (await convertToDIDJWK(key));
       verificationMethod = {
         // did:jwk spec defines that the key is referenced as #0
-        id: did + "#0",
+        id: did + keyRef,
         // there is a discontinued vc-jws spec that defines JsonWebKey2020, but it is the same
         type: verificationMethodType || "JsonWebKey",
         publicKeyJwk: (await key.toJWK()) as JsonWebKeyDID,
@@ -35,7 +39,7 @@ export async function convertToDIDDocument(
       did = did || (await convertToDIDKey(key));
       verificationMethod = {
         // did:key spec defines that the key is referenced with the multi-codec-value
-        id: did + "#" + convertToMultibase(key),
+        id: did + keyRef,
         type: verificationMethodType || "Multikey",
         publicKeyMultibase: convertToMultibase(key),
         controller: did,
@@ -59,10 +63,10 @@ export async function convertToDIDDocument(
     "@context": ldContextArray,
     id: did,
     verificationMethod: [verificationMethod],
-    authentication: [verificationMethod.id],
-    assertionMethod: [verificationMethod.id],
-    capabilityDelegation: [verificationMethod.id],
-    capabilityInvocation: [verificationMethod.id],
+    authentication: [keyRef],
+    assertionMethod: [keyRef],
+    capabilityDelegation: [keyRef],
+    capabilityInvocation: [keyRef],
   };
 
   // X25519 keys are only used for key agreements
@@ -70,8 +74,12 @@ export async function convertToDIDDocument(
     result = {
       id: did,
       verificationMethod: [verificationMethod],
-      keyAgreement: [verificationMethod.id],
+      keyAgreement: [keyRef],
     };
+  }
+
+  if (services && services.length) {
+    result.service = services;
   }
 
   return result;

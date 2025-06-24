@@ -114,14 +114,16 @@ export class Factory {
 
   public static async toDIDDocument(
     key: CryptoKey,
-    verificationMethodType: string = "JsonWebKey",
     did?: string,
+    services?: any,
+    verificationMethodType: string = "JsonWebKey",
   ) {
     return await convertToDIDDocument(
       key,
       VerificationMethods.JsonWebKey,
       verificationMethodType,
       did,
+      services,
     );
   }
 
