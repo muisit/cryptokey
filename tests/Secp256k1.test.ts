@@ -56,45 +56,6 @@ test("export to DID", async () => {
   );
 });
 
-test("import from managed key", async () => {
-  const key = new Secp256k1();
-  const mkey = {
-    kid: pubkeyhex,
-    type: "Secp256k1" as TKeyType,
-    kms: "default",
-    publicKeyHex: pubkeyhex,
-    privateKeyHex: privkeyhex,
-  };
-  await key.importFromManagedKey(mkey);
-
-  expect(key.hasPrivateKey()).toBeTruthy();
-  expect(key.privateKeyBytes === null).toBeFalsy();
-  expect(key.privateKeyBytes!.length).toBe(32);
-  expect(key.hasPublicKey()).toBeTruthy();
-  expect(key.publicKeyBytes === null).toBeFalsy();
-  expect(key.publicKeyBytes!.length).toBe(33);
-  expect(key.exportPrivateKey()).toBe(privkeyhex);
-  expect(key.exportPublicKey()).toBe(pubkeyhex);
-});
-
-test("import from managed public key", async () => {
-  const key = new Secp256k1();
-  const mkey = {
-    kid: pubkeyhex,
-    type: "Ed25519" as TKeyType,
-    kms: "default",
-    publicKeyHex: pubkeyhex,
-  };
-  await key.importFromManagedKey(mkey);
-
-  expect(key.hasPrivateKey()).toBeFalsy();
-  expect(key.privateKeyBytes === null).toBeTruthy();
-  expect(key.hasPublicKey()).toBeTruthy();
-  expect(key.publicKeyBytes === null).toBeFalsy();
-  expect(key.publicKeyBytes!.length).toBe(33);
-  expect(key.exportPublicKey()).toBe(pubkeyhex);
-});
-
 test("signature", async () => {
   const key = new Secp256k1();
   await key.initialisePrivateKey(CryptoKey.hexToBytes(privkeyhex));

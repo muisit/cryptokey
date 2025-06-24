@@ -79,44 +79,6 @@ test("create from jwk", async () => {
   );
 });
 
-test("create from managed key", async () => {
-  let key1 = await Factory.createFromManagedKey({
-    kid: "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
-    type: "Ed25519",
-    kms: "default",
-    publicKeyHex:
-      "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
-  });
-  expect(key1.keyType).toBe("Ed25519");
-  expect(key1.exportPublicKey()).toBe(
-    "5c319b8c2d4803202673ed1ab24bd3425b914d42481967ac4cd93ccfc7decb39",
-  );
-
-  let key2 = await Factory.createFromManagedKey({
-    kid: "034900ce66d2340ea0897c70d0a3fbb82c125ba163f9591ee090be097a11ad39f9",
-    type: "Secp256k1",
-    kms: "default",
-    publicKeyHex:
-      "034900ce66d2340ea0897c70d0a3fbb82c125ba163f9591ee090be097a11ad39f9",
-  });
-  expect(key2.keyType).toBe("Secp256k1");
-  expect(key2.exportPublicKey()).toBe(
-    "034900ce66d2340ea0897c70d0a3fbb82c125ba163f9591ee090be097a11ad39f9",
-  );
-
-  let key3 = await Factory.createFromManagedKey({
-    kid: "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
-    type: "Secp256r1",
-    kms: "default",
-    publicKeyHex:
-      "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
-  });
-  expect(key3.keyType).toBe("Secp256r1");
-  expect(key3.exportPublicKey()).toBe(
-    "03c6e2792c9be06396a078151bc89e6f553412cab000c7ec71c5b992938356d980",
-  );
-});
-
 test("DID:JWK", async () => {
   // this did:jwk does not contain alg and use claims
   const key1 = await Factory.createFromDIDJWK(

@@ -1,5 +1,4 @@
 import { fromString, toString } from "uint8arrays";
-import { IKey } from "@veramo/core-types";
 import * as crypto from "node:crypto";
 
 export abstract class CryptoKey {
@@ -16,15 +15,6 @@ export abstract class CryptoKey {
   abstract createPrivateKey(): Promise<void>;
   abstract algorithms(): string[];
   abstract importFromJWK(jwk: JsonWebKey): Promise<void>;
-
-  async importFromManagedKey(mkey: IKey) {
-    if (mkey.publicKeyHex) {
-      this.publicKeyBytes = CryptoKey.hexToBytes(mkey.publicKeyHex);
-    }
-    if (mkey.privateKeyHex) {
-      this.privateKeyBytes = CryptoKey.hexToBytes(mkey.privateKeyHex);
-    }
-  }
 
   abstract signBytes(algorithm: string, data: Uint8Array): Promise<Uint8Array>;
   async sign(

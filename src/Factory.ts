@@ -4,7 +4,6 @@ import { X25519 } from "./X25519";
 import { Secp256r1 } from "./Secp256r1";
 import { Secp256k1 } from "./Secp256k1";
 import { RSA } from "./RSA";
-import { ManagedKeyInfo } from "@veramo/core-types";
 import { convertFromDIDKey, convertToDIDKey } from "./convertors/convertDIDKey";
 import { convertFromJWK } from "./convertors/convertJWK";
 import { convertFromDIDJWK, convertToDIDJWK } from "./convertors/convertDIDJWK";
@@ -74,34 +73,6 @@ export class Factory {
   }
   public static async toDIDJWK(key: CryptoKey): Promise<string> {
     return await convertToDIDJWK(key);
-  }
-
-  public static async createFromManagedKey(
-    mkey: ManagedKeyInfo,
-  ): Promise<CryptoKey> {
-    let key: CryptoKey;
-    switch ((mkey.type as string).toLowerCase()) {
-      case "ed25519":
-        key = new Ed25519();
-        break;
-      case "x25519":
-        key = new X25519();
-        break;
-      case "secp256r1":
-        key = new Secp256r1();
-        break;
-      case "secp256k1":
-        key = new Secp256k1();
-        break;
-      case "rsa":
-        key = new RSA();
-        break;
-      default:
-        throw new Error("key type " + mkey.type + " not supported");
-    }
-
-    await key.importFromManagedKey(mkey);
-    return key;
   }
 
   public static async createFromJWK(jwk: JsonWebKey): Promise<CryptoKey> {

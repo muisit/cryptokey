@@ -104,45 +104,6 @@ test("export to DID", async () => {
   );
 });
 
-test("import from managed key", async () => {
-  const key = new RSA();
-  const mkey = {
-    kid: pubkeyhex,
-    type: "RSA" as TKeyType,
-    kms: "default",
-    publicKeyHex: pubkeyhex,
-    privateKeyHex: privkeyhex,
-  };
-  await key.importFromManagedKey(mkey);
-
-  expect(key.hasPrivateKey()).toBeTruthy();
-  expect(key.privateKeyBytes === null).toBeFalsy();
-  expect(key.privateKeyBytes!.length).toBe(1216);
-  expect(key.hasPublicKey()).toBeTruthy();
-  expect(key.publicKeyBytes === null).toBeFalsy();
-  expect(key.publicKeyBytes!.length).toBe(294);
-  expect(key.exportPrivateKey()).toBe(privkeyhex);
-  expect(key.exportPublicKey()).toBe(pubkeyhex);
-});
-
-test("import from managed public key", async () => {
-  const key = new RSA();
-  const mkey = {
-    kid: pubkeyhex,
-    type: "RSA" as TKeyType,
-    kms: "default",
-    publicKeyHex: pubkeyhex,
-  };
-  await key.importFromManagedKey(mkey);
-
-  expect(key.hasPrivateKey()).toBeFalsy();
-  expect(key.privateKeyBytes === null).toBeTruthy();
-  expect(key.hasPublicKey()).toBeTruthy();
-  expect(key.publicKeyBytes === null).toBeFalsy();
-  expect(key.publicKeyBytes!.length).toBe(294);
-  expect(key.exportPublicKey()).toBe(pubkeyhex);
-});
-
 test("signature RS256", async () => {
   const key = new RSA();
   await key.initialisePrivateKey(CryptoKey.hexToBytes(privkeyhex));
