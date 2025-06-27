@@ -159,3 +159,13 @@ test("instantiate ed25519 with 64bit private key (2)", async () => {
     "78faa7e63fee80449bcb89e706c544f5f43849ddb2ffdc41f80316ae3ff2dc96",
   );
 });
+
+test("get key reference", () => {
+  expect(
+    Factory.getKeyReference(
+      "did:key:zQ3shjZ5btPjB5qhUqJyH68XczxL11JqCTng4XBwhdy9nVYic",
+    ),
+  ).toBe("zQ3shjZ5btPjB5qhUqJyH68XczxL11JqCTng4XBwhdy9nVYic");
+  expect(Factory.getKeyReference("did:web:lala")).toBe("0");
+  expect(Factory.getKeyReference("did:jwk:lala")).toBe("0");
+});

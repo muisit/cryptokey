@@ -57,6 +57,17 @@ export class Factory {
     throw new Error("Cannot resolve " + keyId);
   }
 
+  public static getKeyReference(keyId: string) {
+    if (keyId.startsWith("did:key:")) {
+      return keyId.substring(8); // according to the spec, the reference is the multibase encoded public key
+    } else if (keyId.startsWith("did:jwk:")) {
+      return "0"; // by definition in the spec
+    } else if (keyId.startsWith("did:web:")) {
+      return "0"; // due to our implementation
+    }
+    throw new Error("Cannot resolve " + keyId);
+  }
+
   public static async createFromDIDWeb(didUrl: string): Promise<CryptoKey> {
     return await convertFromDIDWeb(didUrl);
   }
