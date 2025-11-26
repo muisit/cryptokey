@@ -1,11 +1,10 @@
 import { test, expect } from "vitest";
-import { TKeyType } from "@veramo/core-types";
 import { Secp256r1 } from "../src/Secp256r1";
 import * as crypto from "node:crypto";
 import { Factory } from "../src/Factory";
 import { CryptoKey } from "../src/CryptoKey";
-import { ec } from "elliptic";
-import { toString, fromString } from "uint8arrays";
+import { p256 } from "@noble/curves/p256";
+import { fromString } from "uint8arrays";
 
 const privkeyhex =
   "44d2575ca39d5b875b17f3ae372183acd1da561dbbfde6591facbca98b83fb11";
@@ -155,14 +154,13 @@ test("case: private key conversion issues", async () => {
     expect(key.publicKeyBytes === null).toBeFalsy();
     expect(key.publicKeyBytes!.length).toBe(33);
     expect(key.exportPrivateKey()).toBe(pkey);
-
-    const curve = new ec("p256");
-    const eckey = curve.keyFromPrivate(pkey, 16);
-    const encoded = curve.sign(fromString(pkey, "utf-8"), pkey, 16);
-    const verified = eckey.verify(
-      fromString(pkey, "utf-8"),
+    
+    const encoded = p256.sign(fromString(pkey, "utf-8"), CryptoKey.hexToBytes(pkey));
+    const pubkey = p256.getPublicKey(CryptoKey.hexToBytes(pkey));
+    const verified = p256.verify(
       encoded,
-      eckey.getPublic(),
+      fromString(pkey, "utf-8"),
+      pubkey
     );
     expect(verified).toBeTruthy();
   }
