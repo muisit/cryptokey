@@ -59,14 +59,16 @@ export async function convertToDIDDocument(
     );
   }
 
+  // UniMe/Impierce apparently has problems with a relative reference, so we add the
+  // complete did as a workaround
   let result: DIDDocument = {
     "@context": ldContextArray,
     id: did,
     verificationMethod: [verificationMethod],
-    authentication: [keyRef],
-    assertionMethod: [keyRef],
-    capabilityDelegation: [keyRef],
-    capabilityInvocation: [keyRef],
+    authentication: [did + keyRef],
+    assertionMethod: [did + keyRef],
+    capabilityDelegation: [did + keyRef],
+    capabilityInvocation: [did + keyRef],
   };
 
   // X25519 keys are only used for key agreements
@@ -74,7 +76,7 @@ export async function convertToDIDDocument(
     result = {
       id: did,
       verificationMethod: [verificationMethod],
-      keyAgreement: [keyRef],
+      keyAgreement: [did + keyRef],
     };
   }
 

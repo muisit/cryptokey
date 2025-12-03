@@ -24,13 +24,13 @@ test("Create document", async () => {
   expect(doc.verificationMethod![0].type).toBe("JsonWebKey");
   expect(doc.verificationMethod![0].controller).toBe(doc.id);
   expect(doc.authentication!.length).toBe(1);
-  expect(doc.authentication![0]).toBe("#0");
+  expect(doc.authentication![0]).toBe("did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwidXNlIjoic2lnIiwiYWxnIjoiRVMyNTYiLCJ4IjoieHVKNUxKdmdZNWFnZUJVYnlKNXZWVFFTeXJBQXgteHh4Ym1TazROVzJZQSIsInkiOiJaSHVqWXItSGhObVZydGRmNGljenRDTTJlTUo2WENxNDJNd3d1aGtENmRFIn0#0");
   expect(doc.assertionMethod!.length).toBe(1);
-  expect(doc.assertionMethod![0]).toBe("#0");
+  expect(doc.assertionMethod![0]).toBe("did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwidXNlIjoic2lnIiwiYWxnIjoiRVMyNTYiLCJ4IjoieHVKNUxKdmdZNWFnZUJVYnlKNXZWVFFTeXJBQXgteHh4Ym1TazROVzJZQSIsInkiOiJaSHVqWXItSGhObVZydGRmNGljenRDTTJlTUo2WENxNDJNd3d1aGtENmRFIn0#0");
   expect(doc.capabilityDelegation!.length).toBe(1);
-  expect(doc.capabilityDelegation![0]).toBe("#0");
+  expect(doc.capabilityDelegation![0]).toBe("did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwidXNlIjoic2lnIiwiYWxnIjoiRVMyNTYiLCJ4IjoieHVKNUxKdmdZNWFnZUJVYnlKNXZWVFFTeXJBQXgteHh4Ym1TazROVzJZQSIsInkiOiJaSHVqWXItSGhObVZydGRmNGljenRDTTJlTUo2WENxNDJNd3d1aGtENmRFIn0#0");
   expect(doc.capabilityInvocation!.length).toBe(1);
-  expect(doc.capabilityInvocation![0]).toBe("#0");
+  expect(doc.capabilityInvocation![0]).toBe("did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwidXNlIjoic2lnIiwiYWxnIjoiRVMyNTYiLCJ4IjoieHVKNUxKdmdZNWFnZUJVYnlKNXZWVFFTeXJBQXgteHh4Ym1TazROVzJZQSIsInkiOiJaSHVqWXItSGhObVZydGRmNGljenRDTTJlTUo2WENxNDJNd3d1aGtENmRFIn0#0");
   expect(doc.service).toBeUndefined();
 });
 
@@ -43,7 +43,7 @@ test("Create document with did", async () => {
   expect(doc.verificationMethod![0].id).toBe("did:web:some.example.net#0");
   expect(doc.verificationMethod![0].controller).toBe(doc.id);
   expect(doc.authentication!.length).toBe(1);
-  expect(doc.authentication![0]).toBe("#0");
+  expect(doc.authentication![0]).toBe("did:web:some.example.net#0");
 });
 
 test("Create document with did", async () => {
@@ -55,7 +55,7 @@ test("Create document with did", async () => {
   expect(doc.verificationMethod![0].id).toBe("did:web:some.example.net#0");
   expect(doc.verificationMethod![0].controller).toBe(doc.id);
   expect(doc.authentication!.length).toBe(1);
-  expect(doc.authentication![0]).toBe("#0");
+  expect(doc.authentication![0]).toBe("did:web:some.example.net#0");
 });
 
 test("Create document with alternative verification method", async () => {
@@ -73,7 +73,7 @@ test("Create document with alternative verification method", async () => {
   expect(doc.verificationMethod![0].type).toBe("JsonWebkey2020");
   expect(doc.verificationMethod![0].controller).toBe(doc.id);
   expect(doc.authentication!.length).toBe(1);
-  expect(doc.authentication![0]).toBe("#0");
+  expect(doc.authentication![0]).toBe("did:web:some.example.net#0");
 });
 
 test("Create document with services", async () => {
